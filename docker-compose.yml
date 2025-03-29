@@ -57,7 +57,7 @@ services:
       GRANIAN_LOG_LEVEL: ${GRANIAN_LOG_LEVEL:-info}
       GRANIAN_URL_PATH_PREFIX: ${GRANIAN_URL_PATH_PREFIX:-/}
       GRANIAN_RESPAWN_FAILED_WORKERS: ${GRANIAN_RESPAWN_FAILED_WORKERS:-true}
-    command: ["uv", "-q", "run", "granian", "backcat.main:app"]
+    command: ["uv", "-q", "run", "granian", "backcat.cmd.server:app"]
 
   authentik_server:
     image: ghcr.io/goauthentik/server:2025.2.2
