@@ -44,7 +44,20 @@ services:
       - 127.0.0.1:10804:8080
     volumes:
       - ./config.toml:/app/config.toml
-    command: ["uv", "-q", "run", "python3"]
+    environment:
+      GRANIAN_INTERFACE: asgi
+      GRANIAN_HOST: ${GRANIAN_HOST:-0.0.0.0}
+      GRANIAN_PORT: ${GRANIAN_PORT:-8080}
+      GRANIAN_WORKERS: ${GRANIAN_WORKERS:-4}
+      GRANIAN_RUNTIME_THREADS: ${GRANIAN_RUNTIME_THREADS:-10}
+      GRANIAN_RUNTIME_MODE: ${GRANIAN_RUNTIME_MODE:-mt}
+      GRANIAN_LOOP: ${GRANIAN_LOOP:-uvloop}
+      GRANIAN_BACKLOG: ${GRANIAN_BACKLOG:-1024}
+      GRANIAN_LOG_ENABLED: ${GRANIAN_LOG_ENABLED:-false}
+      GRANIAN_LOG_LEVEL: ${GRANIAN_LOG_LEVEL:-info}
+      GRANIAN_URL_PATH_PREFIX: ${GRANIAN_URL_PATH_PREFIX:-/}
+      GRANIAN_RESPAWN_FAILED_WORKERS: ${GRANIAN_RESPAWN_FAILED_WORKERS:-true}
+    command: ["uv", "-q", "run", "granian", "backcat.cmd.server:app"]
 
   authentik_server:
     image: ghcr.io/goauthentik/server:2025.2.2
@@ -67,7 +80,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-  worker:
+  authentik_worker:
     image: ghcr.io/goauthentik/server:2025.2.2
     restart: unless-stopped
     command: worker

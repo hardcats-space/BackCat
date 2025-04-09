@@ -1,12 +1,21 @@
 [project]
 name = "backcat"
 dynamic = ["version"]
-description = "Add your description here"
+description = "BackCat is backend module for HardCat project written in Python using Litestar framework."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+authors = [
+    { name = 'Azamat Bayramov', email = "bayramov.azamat04@gmail.com" },
+    { name = "Anton Kudryavtsev", email = "dartt0n@ya.ru" },
+]
 dependencies = [
-    "litestar>=2.15.1",
-    "uvicorn>=0.34.0",
+    "dishka>=1.5.2",
+    "granian>=2.1.2",
+    "litestar[standard,opentelemetry,prometheus]>=2.15.1",
+    "msgspec>=0.19.0",
+    "piccolo>=1.24.1",
+    "pydantic-settings>=2.8.1",
+    "structlog>=25.2.0",
 ]
 
 
@@ -34,7 +43,7 @@ venv = ".venv"
 pythonVersion = "3.12"
 pythonPlatform = "Linux"
 reportUnknownMemberType = false
-exclude = ["nanimai_platform/cmd/migrator", "**/__pycache__", "**/.*"]
+exclude = ["**/__pycache__", "**/.*"]
 
 [tool.ruff]
 exclude = [".mypy_cache", ".ruff_cache", ".venv", "venv", "build", "dist"]
@@ -79,4 +88,4 @@ runtime-evaluated-base-classes = [
 ]
 
 [dependency-groups]
-dev = ["hatch>=1.14.0", "ruff>=0.11.2"]
+dev = ["hatch>=1.14.0", "ruff>=0.11.2", "uvicorn>=0.34.0"]
