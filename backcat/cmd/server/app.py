@@ -9,6 +9,8 @@ from litestar import Litestar, Router
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
 from litestar.contrib.opentelemetry import OpenTelemetryConfig, OpenTelemetryPlugin
+from litestar.openapi.config import OpenAPIConfig
+from litestar.openapi.plugins import SwaggerRenderPlugin, RedocRenderPlugin
 from litestar.plugins.prometheus import PrometheusConfig, PrometheusController
 from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
 
@@ -64,6 +66,12 @@ app = Litestar(
     )
     if config.csrf.enabled
     else None,
+    openapi_config=OpenAPIConfig(
+        title="backcat",
+        version=config.version,
+        path="/docs",
+        render_plugins=[SwaggerRenderPlugin(), RedocRenderPlugin()]
+    ),
     lifespan=[lifespan],
 )
 
