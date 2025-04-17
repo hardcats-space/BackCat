@@ -10,9 +10,10 @@ from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
 from litestar.contrib.opentelemetry import OpenTelemetryConfig, OpenTelemetryPlugin
 from litestar.openapi.config import OpenAPIConfig
-from litestar.openapi.plugins import SwaggerRenderPlugin, RedocRenderPlugin
+from litestar.openapi.plugins import RedocRenderPlugin, SwaggerRenderPlugin
 from litestar.plugins.prometheus import PrometheusConfig, PrometheusController
 from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
+from piccolo.engine import engine_finder
 
 from backcat.cmd.server import api
 from backcat.cmd.server.config import ServerConfig
@@ -25,7 +26,13 @@ provider.provide(lambda: config, provides=ServerConfig)
 
 @asynccontextmanager
 async def lifespan(app: Litestar):
+    engine = engine_finder()
+    assert engine is not None, "failed to load database engine"
+    await engine.start_connection_pool()
+
     yield
+
+    await engine.close_connection_pool()
     await app.state.dishka_container.close()
 
 
@@ -70,7 +77,7 @@ app = Litestar(
         title="backcat",
         version=config.version,
         path="/docs",
-        render_plugins=[SwaggerRenderPlugin(), RedocRenderPlugin()]
+        render_plugins=[SwaggerRenderPlugin(), RedocRenderPlugin()],
     ),
     lifespan=[lifespan],
 )
