@@ -59,6 +59,7 @@ dependencies = [
     { name = "litestar", extra = ["opentelemetry", "prometheus", "standard"] },
     { name = "msgspec" },
     { name = "piccolo", extra = ["postgres"] },
+    { name = "pycountry" },
     { name = "pydantic-extra-types" },
     { name = "pydantic-settings" },
     { name = "redis", extra = ["hiredis"] },
@@ -79,6 +80,7 @@ requires-dist = [
     { name = "litestar", extras = ["opentelemetry", "prometheus", "standard"], specifier = ">=2.15.1" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "piccolo", extras = ["postgres"], specifier = ">=1.24.1" },
+    { name = "pycountry", specifier = ">=24.6.1" },
     { name = "pydantic-extra-types", specifier = ">=2.10.3" },
     { name = "pydantic-settings", specifier = ">=2.8.1" },
     { name = "redis", extras = ["hiredis"], specifier = ">=5.2.1" },
@@ -886,6 +888,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220", size = 70762 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35", size = 13993 },
+]
+
+[[package]]
+name = "pycountry"
+version = "24.6.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/57/c389fa68c50590881a75b7883eeb3dc15e9e73a0fdc001cdd45c13290c92/pycountry-24.6.1.tar.gz", hash = "sha256:b61b3faccea67f87d10c1f2b0fc0be714409e8fcdcc1315613174f6466c10221", size = 6043910 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b1/ec/1fb891d8a2660716aadb2143235481d15ed1cbfe3ad669194690b0604492/pycountry-24.6.1-py3-none-any.whl", hash = "sha256:f1a4fb391cd7214f8eefd39556d740adcc233c778a27f8942c8dca351d6ce06f", size = 6335189 },
 ]
 
 [[package]]
