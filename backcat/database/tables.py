@@ -53,7 +53,7 @@ class Area(Table, tablename="areas"):
     deleted_at = Timestamp(default=None, null=True)
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
-
+    description = Varchar(length=5000, null=True)
     price_amount = BigInt(null=False)
     price_currency = Varchar(length=3, null=False)
 

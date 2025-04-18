@@ -13,4 +13,5 @@ class Price(BaseModel):
 
 class Area(DomainBaseModel[AreaID]):
     polygon: list[Point] = Field(min_length=3)
+    description: str | None = Field(max_length=5000)
     price: Price = Field()
