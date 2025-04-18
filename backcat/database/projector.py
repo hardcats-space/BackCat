@@ -165,6 +165,7 @@ def _project_table_poi_to_domain_poi(obj: tables.POI) -> domain.POI:
         kind=domain.POIKind(obj.kind),
         point=domain.Point(lat=obj.lat, lon=obj.lon),
         name=obj.name,
+        description=obj.description,
     )
 
 
@@ -232,6 +233,7 @@ def _project_domain_poi_to_table_poi(obj: domain.POI, camping_id: domain.Camping
         lat=obj.point.lat,
         lon=obj.point.lon,
         name=obj.name,
+        description=obj.description,
         camping=camping_id,
     )
 

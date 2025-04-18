@@ -72,6 +72,7 @@ class POI(Table, tablename="pois"):
     lat: DoublePrecision
     lon: DoublePrecision
     name = Varchar(length=150, null=True)
+    description = Varchar(length=5000, null=True)
 
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this poi is located"""
