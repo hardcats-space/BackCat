@@ -1,6 +1,7 @@
-from typing import Protocol, TypedDict, Unpack
+from typing import Any, Protocol, TypedDict, Unpack
 
 from asyncpg import DataError, UniqueViolationError
+from piccolo.columns import Column
 
 from backcat import domain
 from backcat.database import tables
@@ -11,6 +12,9 @@ from backcat.services.cache import Cache, Keyspace
 
 class UpdateArea(TypedDict):
     polygon: list[domain.Point]
+    description: str | None
+    price_amount: int
+    price_currency: str
 
 
 class AreaRepo(Protocol):
@@ -86,14 +90,22 @@ class AreaRepoImpl:
         try:
             await self._cache.invalidate(self._ks.key(area_id.hex))
 
-            values = {}
+            # todo: validate update values
+
+            values: dict[Column | str, Any] = {}
             if "polygon" in update:
                 values[tables.Area.polygon] = update["polygon"]
+            if "description" in update:
+                values[tables.Area.description] = update["description"]
+            if "price_amount" in update:
+                values[tables.Area.price_amount] = update["price_amount"]
+            if "price_currency" in update:
+                values[tables.Area.price_currency] = update["price_currency"]
 
             async with tables.Area._meta.db.transaction():
                 db_area = (
                     await tables.Area.update(values)
-                    .where(tables.Area.id == area_id)
+                    .where(tables.Area.id == area_id, tables.Area.deleted_at.is_not_null())
                     .returning(*tables.Area.all_columns())
                     .run()
                 )[0]
