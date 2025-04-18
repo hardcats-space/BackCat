@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import piccolo.apps.migrations.commands.forwards
 from dishka import Provider, Scope, make_async_container
 from dishka.integrations.litestar import (
     LitestarProvider,
@@ -29,6 +30,8 @@ async def lifespan(app: Litestar):
     engine = engine_finder()
     assert engine is not None, "failed to load database engine"
     await engine.start_connection_pool()
+
+    await piccolo.apps.migrations.commands.forwards.forwards("all")
 
     yield
 
