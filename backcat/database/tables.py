@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from piccolo.columns import UUID, Array, DoublePrecision, ForeignKey, Timestamp, Varchar
+from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar
 from piccolo.columns.defaults import TimestampNow
 from piccolo.columns.indexes import IndexMethod
 from piccolo.table import Table
@@ -52,6 +52,9 @@ class Area(Table, tablename="areas"):
     deleted_at = Timestamp(default=None, null=True)
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
+
+    price_amount = BigInt(null=False)
+    price_currency = Varchar(length=3, null=False)
 
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this area is available for booking"""
