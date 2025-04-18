@@ -173,7 +173,7 @@ def _project_table_user_to_domain_user(obj: tables.User) -> domain.User:
     return domain.User(
         **_project_table_common(obj),
         name=obj.name,
-        avatar=obj.avatar,
+        thumbnail=obj.thumbnail,
     )
 
 
@@ -242,5 +242,5 @@ def _project_domain_user_to_table_user(obj: domain.User) -> tables.User:
     return tables.User(
         **_project_domain_common(obj),
         name=obj.name,
-        avatar=obj.avatar,
+        thumbnail=obj.thumbnail,
     )

@@ -6,4 +6,4 @@ from backcat.domain.id import UserID
 
 class User(DomainBaseModel[UserID]):
     name: str = Field(max_length=150)
-    avatar: str | None = Field(default=None)
+    thumbnail: str | None = Field(default=None)

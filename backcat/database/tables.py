@@ -24,7 +24,7 @@ class User(Table, tablename="users"):
     deleted_at = Timestamp(default=None, null=True)
 
     name = Varchar(length=150, null=False)
-    avatar = Varchar(null=True)
+    thumbnail = Varchar(null=True)
 
 
 class Camping(Table, tablename="campings"):
