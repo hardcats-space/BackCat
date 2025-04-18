@@ -14,4 +14,4 @@ DB = PostgresEngine(
 )
 
 
-APP_REGISTRY = AppRegistry(apps=[])
+APP_REGISTRY = AppRegistry(apps=["backcat.database.piccolo_app"])
