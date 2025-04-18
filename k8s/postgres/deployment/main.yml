@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: backcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-password
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-username
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-database
+            - name: PG_APP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-username
+            - name: PG_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-password
+            - name: PG_APP_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-database
+          volumeMounts:
+            - name: database-storage
+              mountPath: /var/lib/postgresql/data
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/init.sh
+              subPath: init.sh
+          livenessProbe:
+            exec:
+              command:
+                ["pg_isready", "-d", "$(POSTGRES_DB)", "-U", "$(POSTGRES_USER)"]
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                ["pg_isready", "-d", "$(POSTGRES_DB)", "-U", "$(POSTGRES_USER)"]
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: database-storage
+          persistentVolumeClaim:
+            claimName: database-pvc
+        - name: init-script
+          configMap:
+            name: postgres-init

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-worker
+  namespace: backcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-worker
+  template:
+    metadata:
+      labels:
+        app: authentik-worker
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: authentik-worker
+          image: ghcr.io/goauthentik/server:2025.2.2
+          env:
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis"
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgresql"
+            - name: AUTHENTIK_POSTGRESQL__USER
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-username
+            - name: AUTHENTIK_POSTGRESQL__NAME
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-database
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-password
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: authentik-secret-key
+            - name: AUTHENTIK_DISABLE_STARTUP_ANALYTICS
+              value: "false"
+            - name: AUTHENTIK_DISABLE_UPDATE_CHECK
+              value: "true"
+            - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+              value: "false"
+          volumeMounts:
+            - name: authentik-media
+              mountPath: /media
+            - name: authentik-certs
+              mountPath: /certs
+            - name: authentik-templates
+              mountPath: /templates
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+          command: ["worker"]
+      volumes:
+        - name: authentik-media
+          persistentVolumeClaim:
+            claimName: authentik-media-pvc
+        - name: authentik-certs
+          persistentVolumeClaim:
+            claimName: authentik-certs-pvc
+        - name: authentik-templates
+          emptyDir: {}
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock

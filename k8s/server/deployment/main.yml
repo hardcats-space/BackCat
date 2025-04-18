@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backcat-server
+  namespace: backcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backcat-server
+  template:
+    metadata:
+      labels:
+        app: backcat-server
+    spec:
+      containers:
+        - name: backcat-server
+          image: cr.yandex/crpi9mn4oi4e8mmo9s1a/backcat:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.toml
+              subPath: config.toml
+          env:
+            - name: GRANIAN_INTERFACE
+              value: "asgi"
+            - name: GRANIAN_HOST
+              value: "0.0.0.0"
+            - name: GRANIAN_PORT
+              value: "8080"
+            - name: GRANIAN_WORKERS
+              value: "4"
+            - name: GRANIAN_RUNTIME_THREADS
+              value: "10"
+            - name: GRANIAN_RUNTIME_MODE
+              value: "mt"
+            - name: GRANIAN_LOOP
+              value: "uvloop"
+            - name: GRANIAN_BACKLOG
+              value: "1024"
+            - name: GRANIAN_LOG_ENABLED
+              value: "false"
+            - name: GRANIAN_LOG_LEVEL
+              value: "info"
+            - name: GRANIAN_URL_PATH_PREFIX
+              value: "/"
+            - name: GRANIAN_RESPAWN_FAILED_WORKERS
+              value: "true"
+            - name: POSTGRES_HOSTNAME
+              value: "postgresql"
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-password
+            - name: POSTGRES_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-app-database
+          command: ["uv", "-q", "run", "granian", "backcat.cmd.server:app"]
+      volumes:
+        - name: config-volume
+          configMap:
+            name: backcat-config

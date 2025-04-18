@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backcat-config
+  namespace: backcat
+data:
+  config.toml: |
+    [log]
+    level = "DEBUG"
+
+    [cors]
+
+    [csrf]
+    enabled = false

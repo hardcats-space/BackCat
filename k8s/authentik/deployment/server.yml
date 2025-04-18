@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-server
+  namespace: backcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-server
+  template:
+    metadata:
+      labels:
+        app: authentik-server
+    spec:
+      containers:
+        - name: authentik-server
+          image: ghcr.io/goauthentik/server:2025.2.2
+          ports:
+            - containerPort: 9000
+          env:
+            - name: AUTHENTIK_REDIS__HOST
+              value: "redis"
+            - name: AUTHENTIK_POSTGRESQL__HOST
+              value: "postgresql"
+            - name: AUTHENTIK_POSTGRESQL__USER
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-username
+            - name: AUTHENTIK_POSTGRESQL__NAME
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-database
+            - name: AUTHENTIK_POSTGRESQL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: pg-authentik-password
+            - name: AUTHENTIK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backcat-secrets
+                  key: authentik-secret-key
+          volumeMounts:
+            - name: authentik-media
+              mountPath: /media
+            - name: authentik-templates
+              mountPath: /templates
+          command: ["server"]
+      volumes:
+        - name: authentik-media
+          persistentVolumeClaim:
+            claimName: authentik-media-pvc
+        - name: authentik-templates
+          emptyDir: {}

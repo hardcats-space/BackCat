@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backcat-ingress
+  namespace: backcat
+spec:
+  rules:
+    - host: hardcats.space
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backcat-server
+                port:
+                  number: 8080
+    - host: auth.hardcats.space
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server
+                port:
+                  number: 9000
