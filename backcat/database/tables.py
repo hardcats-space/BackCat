@@ -38,6 +38,7 @@ class Camping(Table, tablename="campings"):
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
     title = Varchar(length=250, null=False)
+    description = Varchar(length=5000, null=True)
 
     user = ForeignKey(references=User, null=False, target_column=User.id)
 

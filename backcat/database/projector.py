@@ -153,6 +153,7 @@ def _project_table_camping_to_domain_camping(obj: tables.Camping) -> domain.Camp
     return domain.Camping(
         **_project_table_common(obj),
         polygon=[domain.Point(lat=point[0], lon=point[1]) for point in obj.polygon],
+        description=obj.description,
         title=obj.title,
     )
 
@@ -217,6 +218,7 @@ def _project_domain_camping_to_table_camping(obj: domain.Camping, user_id: domai
         **_project_domain_common(obj),
         polygon=[[point.lat, point.lon] for point in obj.polygon],
         title=obj.title,
+        description=obj.description,
         user=user_id,
     )
 
