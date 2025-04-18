@@ -6,23 +6,23 @@ from backcat import domain
 
 
 class CreateAreaRequest(PydanticDTO[domain.Area]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"})
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, rename_strategy="camel")
 
 
 class CreateAreaResponse(PydanticDTO[domain.Area]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class UpdateAreaRequest(PydanticDTO[domain.Area]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True)
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True, rename_strategy="camel")
 
 
 class UpdateAreaResponse(PydanticDTO[domain.Area]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class ReadAreaResponse(PydanticDTO[domain.Area]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class _ReadManyAreas(BaseModel):
@@ -30,4 +30,4 @@ class _ReadManyAreas(BaseModel):
 
 
 class ReadManyAreasResponse(PydanticDTO[_ReadManyAreas]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")

@@ -12,19 +12,21 @@ class CreateCampingRequest(PydanticDTO[domain.Camping]):
 
 
 class CreateCampingResponse(PydanticDTO[domain.Camping]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class UpdateCampingRequest(PydanticDTO[domain.Camping]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at", "thumbnails"}, partial=True)
+    config = DTOConfig(
+        exclude={"id", "created_at", "updated_at", "deleted_at", "thumbnails"}, partial=True, rename_strategy="camel"
+    )
 
 
 class UpdateCampingResponse(PydanticDTO[domain.Camping]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class ReadCampingResponse(PydanticDTO[domain.Camping]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 type Group = Literal["all", "my", "booked"]
@@ -39,4 +41,4 @@ class _ReadManyCampings(BaseModel):
 
 
 class ReadManyCampingResponse(PydanticDTO[_ReadManyCampings]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")

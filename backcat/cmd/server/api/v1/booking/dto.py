@@ -6,23 +6,23 @@ from backcat import domain
 
 
 class CreateBookingRequest(PydanticDTO[domain.Booking]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"})
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, rename_strategy="camel")
 
 
 class CreateBookingResponse(PydanticDTO[domain.Booking]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class UpdateBookingRequest(PydanticDTO[domain.Booking]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True)
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True, rename_strategy="camel")
 
 
 class UpdateBookingResponse(PydanticDTO[domain.Booking]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class ReadBookingResponse(PydanticDTO[domain.Booking]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class _ReadManyBookings(BaseModel):
@@ -30,4 +30,4 @@ class _ReadManyBookings(BaseModel):
 
 
 class ReadManyBookingResponse(PydanticDTO[_ReadManyBookings]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")

@@ -6,23 +6,23 @@ from backcat import domain
 
 
 class CreatePOIRequest(PydanticDTO[domain.POI]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"})
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, rename_strategy="camel")
 
 
 class CreatePOIResponse(PydanticDTO[domain.POI]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class UpdatePOIRequest(PydanticDTO[domain.POI]):
-    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True)
+    config = DTOConfig(exclude={"id", "created_at", "updated_at", "deleted_at"}, partial=True, rename_strategy="camel")
 
 
 class UpdatePOIResponse(PydanticDTO[domain.POI]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class ReadPOIResponse(PydanticDTO[domain.POI]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
 
 
 class _ReadManyPOIs(BaseModel):
@@ -30,4 +30,4 @@ class _ReadManyPOIs(BaseModel):
 
 
 class ReadManyPOIResponse(PydanticDTO[_ReadManyPOIs]):
-    config = DTOConfig()
+    config = DTOConfig(rename_strategy="camel")
