@@ -137,6 +137,8 @@ def _project_table_area_to_domain_area(obj: tables.Area) -> domain.Area:
     return domain.Area(
         **_project_table_common(obj),
         polygon=[domain.Point(lat=point[0], lon=point[1]) for point in obj.polygon],
+        description=obj.description,
+        price=domain.Price(amount=obj.price_amount, currency=obj.price_currency),  # type: ignore
     )
 
 
@@ -152,6 +154,8 @@ def _project_table_camping_to_domain_camping(obj: tables.Camping) -> domain.Camp
     return domain.Camping(
         **_project_table_common(obj),
         polygon=[domain.Point(lat=point[0], lon=point[1]) for point in obj.polygon],
+        description=obj.description,
+        thumbnails=obj.thumbnails,
         title=obj.title,
     )
 
@@ -162,6 +166,7 @@ def _project_table_poi_to_domain_poi(obj: tables.POI) -> domain.POI:
         kind=domain.POIKind(obj.kind),
         point=domain.Point(lat=obj.lat, lon=obj.lon),
         name=obj.name,
+        description=obj.description,
     )
 
 
@@ -169,7 +174,7 @@ def _project_table_user_to_domain_user(obj: tables.User) -> domain.User:
     return domain.User(
         **_project_table_common(obj),
         name=obj.name,
-        avatar=obj.avatar,
+        thumbnail=obj.thumbnail,
     )
 
 
@@ -193,6 +198,9 @@ def _project_domain_area_to_table_area(obj: domain.Area, camping_id: domain.Camp
     return tables.Area(
         **_project_domain_common(obj),
         polygon=[[point.lat, point.lon] for point in obj.polygon],
+        description=obj.description,
+        price_amount=obj.price.amount,
+        price_currency=str(obj.price.currency),
         camping=camping_id,
     )
 
@@ -214,6 +222,8 @@ def _project_domain_camping_to_table_camping(obj: domain.Camping, user_id: domai
         **_project_domain_common(obj),
         polygon=[[point.lat, point.lon] for point in obj.polygon],
         title=obj.title,
+        description=obj.description,
+        thumbnails=obj.thumbnails,
         user=user_id,
     )
 
@@ -225,6 +235,7 @@ def _project_domain_poi_to_table_poi(obj: domain.POI, camping_id: domain.Camping
         lat=obj.point.lat,
         lon=obj.point.lon,
         name=obj.name,
+        description=obj.description,
         camping=camping_id,
     )
 
@@ -233,5 +244,5 @@ def _project_domain_user_to_table_user(obj: domain.User) -> tables.User:
     return tables.User(
         **_project_domain_common(obj),
         name=obj.name,
-        avatar=obj.avatar,
+        thumbnail=obj.thumbnail,
     )

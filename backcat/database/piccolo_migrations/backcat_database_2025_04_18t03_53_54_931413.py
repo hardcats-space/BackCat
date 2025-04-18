@@ -5,7 +5,7 @@ from backcat.database import tables
 
 ID = "2025-04-18T03:53:54:931413"
 VERSION = "1.24.1"
-DESCRIPTION = ""
+DESCRIPTION = "initial creation of tables"
 
 
 class SQL(Table): ...

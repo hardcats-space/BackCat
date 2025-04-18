@@ -8,6 +8,7 @@ from . import poi_kind
 from . import point as point
 from . import user as user
 from .area import Area as Area
+from .area import Price as Price
 from .base import DomainBaseModel
 from .booking import Booking as Booking
 from .camping import Camping

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from piccolo.columns import UUID, Array, DoublePrecision, ForeignKey, Timestamp, Varchar
+from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar
 from piccolo.columns.defaults import TimestampNow
 from piccolo.columns.indexes import IndexMethod
 from piccolo.table import Table
@@ -24,7 +24,7 @@ class User(Table, tablename="users"):
     deleted_at = Timestamp(default=None, null=True)
 
     name = Varchar(length=150, null=False)
-    avatar = Varchar(null=True)
+    thumbnail = Varchar(null=True)
 
 
 class Camping(Table, tablename="campings"):
@@ -38,6 +38,8 @@ class Camping(Table, tablename="campings"):
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
     title = Varchar(length=250, null=False)
+    description = Varchar(length=5000, null=True)
+    thumbnails = Array(base_column=Varchar(255), null=False)
 
     user = ForeignKey(references=User, null=False, target_column=User.id)
 
@@ -52,6 +54,9 @@ class Area(Table, tablename="areas"):
     deleted_at = Timestamp(default=None, null=True)
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
+    description = Varchar(length=5000, null=True)
+    price_amount = BigInt(null=False)
+    price_currency = Varchar(length=3, null=False)
 
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this area is available for booking"""
@@ -68,6 +73,7 @@ class POI(Table, tablename="pois"):
     lat: DoublePrecision
     lon: DoublePrecision
     name = Varchar(length=150, null=True)
+    description = Varchar(length=5000, null=True)
 
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this poi is located"""
