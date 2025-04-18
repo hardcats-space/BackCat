@@ -12,7 +12,8 @@ class Camping(DomainBaseModel[CampingID]):
     thumbnails: list[str] = Field(default_factory=list, min_length=0, max_length=5)
 
     @field_validator("thumbnails", mode="after")
-    def _(self, value: list[str]) -> list[str]:
+    @classmethod
+    def _(cls, value: list[str]) -> list[str]:
         for thumbnail in value:
             if len(thumbnail) > 255:
                 raise ValueError("thumbnails must be less than 255 characters")

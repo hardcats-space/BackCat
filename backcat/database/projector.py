@@ -173,6 +173,8 @@ def _project_table_poi_to_domain_poi(obj: tables.POI) -> domain.POI:
 def _project_table_user_to_domain_user(obj: tables.User) -> domain.User:
     return domain.User(
         **_project_table_common(obj),
+        email=obj.email,
+        password=obj.password,
         name=obj.name,
         thumbnail=obj.thumbnail,
     )
@@ -244,5 +246,7 @@ def _project_domain_user_to_table_user(obj: domain.User) -> tables.User:
     return tables.User(
         **_project_domain_common(obj),
         name=obj.name,
+        email=obj.email,
+        password=obj.password,
         thumbnail=obj.thumbnail,
     )

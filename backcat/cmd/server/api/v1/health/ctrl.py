@@ -1,14 +1,14 @@
 import litestar
 from dishka.integrations.litestar import FromDishka, inject
 
-from backcat.cmd.server.api.v1.health.dto import HealthDTO
+from backcat.cmd.server.api.v1.health import dto
 from backcat.cmd.server.config import ServerConfig
 
 
 class Controller(litestar.Controller):
-    path = "/"
+    path = "/health"
 
     @litestar.get("")
     @inject
-    async def _(self, config: FromDishka[ServerConfig]) -> HealthDTO:
-        return HealthDTO(status="OK", version=config.version)
+    async def health(self, config: FromDishka[ServerConfig]) -> dto.HealthDTO:
+        return dto.HealthDTO(status="OK", version=config.version)

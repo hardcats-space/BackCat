@@ -13,3 +13,11 @@ migration-up:
 .PHONY: migration-down
 migration-down:
 	uv run piccolo migrations backward all
+
+.PHONY: typescript
+typescript:
+	uv run litestar --app backcat.cmd.server:app schema typescript --output dist/hardcats.ts
+
+.PHONY: openapi
+openapi:
+	uv run litestar --app backcat.cmd.server:app schema openapi --output dist/openapi.json
