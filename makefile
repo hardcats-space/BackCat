@@ -21,3 +21,6 @@ typescript:
 .PHONY: openapi
 openapi:
 	uv run litestar --app backcat.cmd.server:app schema openapi --output dist/openapi.json
+
+.PHONY: schema
+schema: typescript openapi

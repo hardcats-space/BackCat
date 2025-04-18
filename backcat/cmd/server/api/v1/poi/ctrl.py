@@ -1,0 +1,29 @@
+import litestar
+from litestar.dto import DTOData
+
+from backcat import domain
+from backcat.cmd.server.api.v1.poi import dto
+
+
+class Controller(litestar.Controller):
+    path = "/poi"
+
+    @litestar.post("", dto=dto.CreatePOIRequest, return_dto=dto.CreatePOIResponse)
+    async def create(self, data: DTOData[domain.POI], camping_id: domain.CampingID) -> domain.POI:
+        raise NotImplementedError
+
+    @litestar.get("/{id:uuid}", return_dto=dto.ReadPOIResponse)
+    async def read_one(self, id: domain.POIID) -> domain.POI:
+        raise NotImplementedError
+
+    @litestar.get("", return_dto=dto.ReadManyPOIResponse)
+    async def read_many(self, camping_id: domain.CampingID) -> dto._ReadManyPOIs:
+        raise NotImplementedError
+
+    @litestar.patch("/{id:uuid}", dto=dto.UpdatePOIRequest, return_dto=dto.UpdatePOIResponse)
+    async def update(self, id: domain.POIID, data: DTOData[domain.POI]) -> domain.POI:
+        raise NotImplementedError
+
+    @litestar.delete("/{id:uuid}")
+    async def delete(self, id: domain.POIID) -> None:
+        raise NotImplementedError

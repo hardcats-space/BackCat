@@ -45,7 +45,11 @@ app = Litestar(
         Router(
             "/api/v1",
             route_handlers=[
+                api.v1.area.Controller,
+                api.v1.booking.Controller,
+                api.v1.camping.Controller,
                 api.v1.health.Controller,
+                api.v1.poi.Controller,
                 api.v1.user.Controller,
             ],
         ),
