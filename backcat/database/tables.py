@@ -24,6 +24,8 @@ class User(Table, tablename="users"):
     deleted_at = Timestamp(default=None, null=True)
 
     name = Varchar(length=150, null=False)
+    email = Varchar(length=255, null=False)
+    password = Varchar(length=512, null=False)
     thumbnail = Varchar(null=True)
 
 

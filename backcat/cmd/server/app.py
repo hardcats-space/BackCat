@@ -42,8 +42,24 @@ async def lifespan(app: Litestar):
 app = Litestar(
     debug=config.log.level == "DEBUG",
     route_handlers=[
-        Router("/api/v1/health", route_handlers=[api.v1.health.Controller]),
-        PrometheusController,
+        Router(
+            "/api/v1",
+            route_handlers=[
+                api.v1.area.Controller,
+                api.v1.booking.Controller,
+                api.v1.camping.Controller,
+                api.v1.health.Controller,
+                api.v1.poi.Controller,
+                api.v1.user.Controller,
+            ],
+        ),
+        Router(
+            "/api/extra",
+            include_in_schema=False,
+            route_handlers=[
+                PrometheusController,
+            ],
+        ),
     ],
     plugins=[
         StructlogPlugin(StructlogConfig()),

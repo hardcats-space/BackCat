@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 from pydantic_extra_types.currency_code import ISO4217
 
@@ -8,7 +10,7 @@ from backcat.domain.point import Point
 
 class Price(BaseModel):
     amount: int = Field(le=100)
-    currency: ISO4217
+    currency: Annotated[str, ISO4217]
 
 
 class Area(DomainBaseModel[AreaID]):
