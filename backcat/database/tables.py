@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar
+from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar, SmallInt
 from piccolo.columns.defaults import TimestampNow
 from piccolo.columns.indexes import IndexMethod
 from piccolo.table import Table
@@ -90,6 +90,20 @@ class Booking(Table, tablename="bookings"):
 
     booked_since = Timestamp(null=False)
     booked_till = Timestamp(null=False)
+
+    area = ForeignKey(references=Area, null=False, target_column=Area.id)
+    user = ForeignKey(references=User, null=False, target_column=User.id)
+
+
+class Review(Table, tablename="reviews"):
+    id = UUID(primary_key=True, index_method=IndexMethod.hash)
+
+    created_at = Timestamp(default=TimestampNow(), null=False)
+    updated_at = Timestamp(auto_update=datetime.now, null=False)
+    deleted_at = Timestamp(default=None, null=True)
+
+    rating = SmallInt(null=False)
+    comment = Varchar(length=5000, null=True)
 
     area = ForeignKey(references=Area, null=False, target_column=Area.id)
     user = ForeignKey(references=User, null=False, target_column=User.id)
