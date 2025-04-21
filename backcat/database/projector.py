@@ -41,6 +41,10 @@ def projection(obj: tables.User) -> domain.User: ...
 
 
 @overload
+def projection(obj: tables.Review) -> domain.Review: ...
+
+
+@overload
 def projection(obj: domain.Area, *, camping_id: domain.CampingID) -> tables.Area: ...
 
 
@@ -58,6 +62,9 @@ def projection(obj: domain.POI, *, camping_id: domain.CampingID) -> tables.POI: 
 
 @overload
 def projection(obj: domain.User) -> tables.User: ...
+
+@overload
+def projection(obj: domain.Review, *, area_id: domain.AreaID, user_id: domain.UserID) -> tables.Review: ...
 
 
 def projection(  # noqa: C901
@@ -79,6 +86,8 @@ def projection(  # noqa: C901
             return _project_table_poi_to_domain_poi(obj)
         case tables.User():
             return _project_table_user_to_domain_user(obj)
+        case tables.Review():
+            return _project_table_review_to_domain_review(obj)
         case domain.Area():
             if camping_id is None:
                 raise ProjectionError("camping_id is required for projection from domain.Area")
@@ -97,6 +106,10 @@ def projection(  # noqa: C901
             return _project_domain_poi_to_table_poi(obj, camping_id)
         case domain.User():
             return _project_domain_user_to_table_user(obj)
+        case domain.Review():
+            if area_id is None or user_id is None:
+                raise ProjectionError("area_id and user_id are required for projection from domain.Review")
+            return _project_domain_review_to_table_review(obj, area_id, user_id)
 
         case dict():
             if cast_to is None:
@@ -180,6 +193,14 @@ def _project_table_user_to_domain_user(obj: tables.User) -> domain.User:
     )
 
 
+def _project_table_review_to_domain_review(obj: tables.Review) -> domain.Review:
+    return domain.Review(
+        **_project_table_common(obj),
+        rating=obj.rating,
+        comment=obj.comment,
+    )
+
+
 class DomainCommonProjection(TypedDict):
     id: UUID
     created_at: datetime
@@ -249,4 +270,14 @@ def _project_domain_user_to_table_user(obj: domain.User) -> tables.User:
         email=obj.email,
         password=obj.password,
         thumbnail=obj.thumbnail,
+    )
+
+
+def _project_domain_review_to_table_review(obj: domain.Review, area_id: domain.AreaID, user_id: domain.UserID) -> tables.Review:
+    return tables.Review(
+        **_project_domain_common(obj),
+        rating=obj.rating,
+        comment=obj.comment,
+        area=area_id,
+        user=user_id,
     )
