@@ -12,8 +12,9 @@ from .area import Price as Price
 from .base import DomainBaseModel
 from .booking import Booking as Booking
 from .camping import Camping
-from .id import POIID, AreaID, BookingID, CampingID, UserID
+from .id import POIID, AreaID, BookingID, CampingID, UserID, ReviewID
 from .poi import POI as POI
 from .poi_kind import POIKind
 from .point import Point as Point
 from .user import User as User
+from .review import Review as Review
