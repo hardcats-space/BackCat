@@ -788,7 +788,7 @@ async def forwards():
             "default": "",
             "null": False,
             "primary_key": False,
-            "unique": False,
+            "unique": True,
             "index": False,
             "index_method": IndexMethod.btree,
             "choices": None,

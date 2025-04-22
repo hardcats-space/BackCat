@@ -20,9 +20,9 @@ services:
       - database:/var/lib/postgresql/data
       - ./init.sh/:/docker-entrypoint-initdb.d/init.sh
     environment:
-      POSTGRES_PASSWORD: ${PG_AUTHENTIK_PASSWORD}
-      POSTGRES_USER: ${PG_AUTHENTIK_USERNAME}
-      POSTGRES_DB: ${PG_AUTHENTIK_DATABASE}
+      POSTGRES_USER: ${PG_ADMIN_USERNAME}
+      POSTGRES_PASSWORD: ${PG_ADMIN_PASSWORD}
+      POSTGRES_DB: ${PG_ADMIN_DATABASE}
       PG_APP_USERNAME: ${PG_APP_USERNAME}
       PG_APP_PASSWORD: ${PG_APP_PASSWORD}
       PG_APP_DATABASE: ${PG_APP_DATABASE}
@@ -64,8 +64,10 @@ services:
       GRANIAN_URL_PATH_PREFIX: ${GRANIAN_URL_PATH_PREFIX:-/}
       GRANIAN_RESPAWN_FAILED_WORKERS: ${GRANIAN_RESPAWN_FAILED_WORKERS:-true}
       #
-      POSTGRES_HOSTNAME: postgresql
+      POSTGRES_HOSTNAME: postgres
       POSTGRES_USERNAME: ${PG_APP_USERNAME}
       POSTGRES_PASSWORD: ${PG_APP_PASSWORD}
       POSTGRES_DATABASE: ${PG_APP_DATABASE}
     command: ["uv", "-q", "run", "granian", "backcat.cmd.server:app"]
+    depends_on:
+      - postgres

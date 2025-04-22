@@ -4,6 +4,11 @@ from litestar.plugins.pydantic import PydanticDTO
 from backcat import domain
 
 
+class Oauth2TokenRequest(PydanticDTO[domain.User]):
+    # oauth2 compliant request
+    config = DTOConfig(include={"email", "password"}, rename_strategy="camel", rename_fields={"email": "username"})
+
+
 class SignUpUserRequest(PydanticDTO[domain.User]):
     config = DTOConfig(include={"email", "name", "password"}, rename_strategy="camel")
 

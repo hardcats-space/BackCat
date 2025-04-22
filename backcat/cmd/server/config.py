@@ -10,12 +10,14 @@ class ServerConfig(BaseSettings):
     log: configs.Log
     cors: configs.CORS
     csrf: configs.CSRF
+    jwt: configs.JWT
+    redis: configs.Redis
 
     # config loading options
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_prefix="backcat_",
         case_sensitive=False,
-        env_nested_delimiter=".",
+        env_nested_delimiter="__",
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
