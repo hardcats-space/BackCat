@@ -7,6 +7,7 @@ from backcat.cmd.server.api.v1.area import dto
 
 class Controller(litestar.Controller):
     path = "/area"
+    tags = ["area"]
 
     @litestar.post("", dto=dto.CreateAreaRequest, return_dto=dto.CreateAreaResponse)
     async def create(self, data: DTOData[domain.Area]) -> domain.Area:

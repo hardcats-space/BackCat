@@ -7,6 +7,7 @@ from backcat.cmd.server.api.v1.review import dto
 
 class Controller(litestar.Controller):
     path = "/review"
+    tags = ["review"]
 
     @litestar.post("", dto=dto.CreateReviewRequest, return_dto=dto.CreateReviewResponse)
     async def create(self, data: DTOData[domain.Review], area_id: domain.AreaID) -> domain.Review:

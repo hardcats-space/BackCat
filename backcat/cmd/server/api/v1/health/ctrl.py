@@ -7,6 +7,7 @@ from backcat.cmd.server.config import ServerConfig
 
 class Controller(litestar.Controller):
     path = "/health"
+    tags = ["health"]
 
     @litestar.get("")
     @inject
