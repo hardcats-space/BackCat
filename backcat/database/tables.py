@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Protocol
 
-from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar, SmallInt
-from piccolo.columns.defaults import TimestampNow
+from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, SmallInt, Timestamptz, Varchar
+from piccolo.columns.defaults.timestamptz import TimestamptzNow
 from piccolo.columns.indexes import IndexMethod
 from piccolo.table import Table
 
@@ -11,20 +11,20 @@ from backcat import domain
 
 class TableBaseModel(Protocol):
     id = UUID()
-    created_at = Timestamp()
-    updated_at = Timestamp()
-    deleted_at = Timestamp()
+    created_at = Timestamptz()
+    updated_at = Timestamptz()
+    deleted_at = Timestamptz()
 
 
 class User(Table, tablename="users"):
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
     name = Varchar(length=150, null=False)
-    email = Varchar(length=255, null=False)
+    email = Varchar(length=255, null=False, unique=True)
     password = Varchar(length=512, null=False)
     thumbnail = Varchar(null=True)
 
@@ -34,9 +34,9 @@ class Camping(Table, tablename="campings"):
 
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
     title = Varchar(length=250, null=False)
@@ -51,9 +51,9 @@ class Area(Table, tablename="areas"):
 
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
     polygon = Array(base_column=Array(base_column=DoublePrecision()), null=False)
     description = Varchar(length=5000, null=True)
@@ -67,11 +67,11 @@ class Area(Table, tablename="areas"):
 class POI(Table, tablename="pois"):
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
-    kind = Varchar(choices=domain.POIKind, defalt=domain.POIKind.GENERAL, null=False)
+    kind = Varchar(choices=domain.POIKind, default=domain.POIKind.GENERAL, null=False)
     lat: DoublePrecision
     lon: DoublePrecision
     name = Varchar(length=150, null=True)
@@ -84,12 +84,12 @@ class POI(Table, tablename="pois"):
 class Booking(Table, tablename="bookings"):
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
-    booked_since = Timestamp(null=False)
-    booked_till = Timestamp(null=False)
+    booked_since = Timestamptz(null=False)
+    booked_till = Timestamptz(null=False)
 
     area = ForeignKey(references=Area, null=False, target_column=Area.id)
     user = ForeignKey(references=User, null=False, target_column=User.id)
@@ -98,9 +98,9 @@ class Booking(Table, tablename="bookings"):
 class Review(Table, tablename="reviews"):
     id = UUID(primary_key=True, index_method=IndexMethod.hash)
 
-    created_at = Timestamp(default=TimestampNow(), null=False)
-    updated_at = Timestamp(auto_update=datetime.now, null=False)
-    deleted_at = Timestamp(default=None, null=True)
+    created_at = Timestamptz(default=TimestamptzNow(), null=False)
+    updated_at = Timestamptz(auto_update=datetime.now, null=False)
+    deleted_at = Timestamptz(default=None, null=True)
 
     rating = SmallInt(null=False)
     comment = Varchar(length=5000, null=True)

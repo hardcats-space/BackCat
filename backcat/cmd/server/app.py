@@ -1,28 +1,56 @@
 from contextlib import asynccontextmanager
+from datetime import timedelta
 
 import piccolo.apps.migrations.commands.forwards
 from dishka import Provider, Scope, make_async_container
-from dishka.integrations.litestar import (
-    LitestarProvider,
-    setup_dishka,
-)
+from dishka.integrations.litestar import LitestarProvider, setup_dishka
 from litestar import Litestar, Router
 from litestar.config.cors import CORSConfig
 from litestar.config.csrf import CSRFConfig
 from litestar.contrib.opentelemetry import OpenTelemetryConfig, OpenTelemetryPlugin
 from litestar.openapi.config import OpenAPIConfig
-from litestar.openapi.plugins import RedocRenderPlugin, SwaggerRenderPlugin
+from litestar.openapi.plugins import ScalarRenderPlugin, SwaggerRenderPlugin
 from litestar.plugins.prometheus import PrometheusConfig, PrometheusController
 from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
+from litestar.security.jwt import OAuth2PasswordBearerAuth
 from piccolo.engine import engine_finder
 
-from backcat.cmd.server import api
+from backcat import domain, services
+from backcat.cmd.server import api, authorization
 from backcat.cmd.server.config import ServerConfig
 
 config = ServerConfig()  # type: ignore
 
 provider = Provider(scope=Scope.APP)
 provider.provide(lambda: config, provides=ServerConfig)
+provider.provide(lambda: services.Cache(config.redis.dsn), provides=services.Cache)
+provider.provide(services.AreaRepoImpl, provides=services.AreaRepo)
+provider.provide(services.BookingRepoImpl, provides=services.BookingRepo)
+provider.provide(services.CampingRepoImpl, provides=services.CampingRepo)
+provider.provide(services.POIRepoImpl, provides=services.POIRepo)
+provider.provide(services.UserRepoImpl, provides=services.UserRepo)
+provider.provide(services.TokenRepoImpl, provides=services.TokenRepo)
+provider.provide(lambda: oauth2, provides=OAuth2PasswordBearerAuth[domain.User])  # note: global scope capture
+container = make_async_container(provider, LitestarProvider())
+
+oauth2 = OAuth2PasswordBearerAuth[domain.User](
+    retrieve_user_handler=authorization.retrieve_user_factory(container),
+    revoked_token_handler=authorization.revoked_token_factory(container),
+    token_secret=config.jwt.secret,
+    token_url="/api/v1/user/oauth2/token",
+    exclude=[
+        "/api/v1/user/oauth2/token",
+        "/api/v1/user/sign-in",
+        "/api/v1/user/sign-up",
+        "/api/schema/*",
+        "/api/extra/*",
+    ],
+    algorithm=config.jwt.algorithm,
+    accepted_audiences=["backcat"],
+    accepted_issuers=["backcat"],
+    strict_audience=True,
+    default_token_expiration=timedelta(seconds=config.jwt.token_expires),
+)
 
 
 @asynccontextmanager
@@ -95,10 +123,15 @@ app = Litestar(
     openapi_config=OpenAPIConfig(
         title="backcat",
         version=config.version,
-        path="/docs",
-        render_plugins=[SwaggerRenderPlugin(), RedocRenderPlugin()],
+        path="/api/schema",
+        render_plugins=[
+            SwaggerRenderPlugin(path="/swagger"),
+            ScalarRenderPlugin(path="/scalar"),
+        ],
     ),
     lifespan=[lifespan],
+    on_app_init=[oauth2.on_app_init],
 )
 
-setup_dishka(container=make_async_container(provider, LitestarProvider()), app=app)
+
+setup_dishka(container=container, app=app)

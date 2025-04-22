@@ -33,8 +33,8 @@ class Cache:
     HOT_FEAT = timedelta(minutes=5)
     COLD_FEAT = timedelta(minutes=30)
 
-    def __init__(self, redis_dns):
-        self._redis = Redis.from_url(redis_dns)
+    def __init__(self, redis_dns: pydantic.RedisDsn):
+        self._redis = Redis.from_url(redis_dns.unicode_string())
 
     @overload
     async def get(self, key: Key, *, silent: bool = True) -> dict[str, Any] | None: ...

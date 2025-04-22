@@ -7,6 +7,7 @@ from backcat.cmd.server.api.v1.camping import dto
 
 class Controller(litestar.Controller):
     path = "/camping"
+    tags = ["camping"]
 
     @litestar.post("", dto=dto.CreateCampingRequest, return_dto=dto.CreateCampingResponse)
     async def create(self, data: DTOData[domain.Camping]) -> domain.Camping:

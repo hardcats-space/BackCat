@@ -7,6 +7,7 @@ from backcat.cmd.server.api.v1.poi import dto
 
 class Controller(litestar.Controller):
     path = "/poi"
+    tags = ["poi"]
 
     @litestar.post("", dto=dto.CreatePOIRequest, return_dto=dto.CreatePOIResponse)
     async def create(self, data: DTOData[domain.POI], camping_id: domain.CampingID) -> domain.POI:

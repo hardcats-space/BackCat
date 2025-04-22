@@ -63,6 +63,7 @@ def projection(obj: domain.POI, *, camping_id: domain.CampingID) -> tables.POI: 
 @overload
 def projection(obj: domain.User) -> tables.User: ...
 
+
 @overload
 def projection(obj: domain.Review, *, area_id: domain.AreaID, user_id: domain.UserID) -> tables.Review: ...
 
@@ -133,7 +134,7 @@ def _project_table_common(obj: tables.TableBaseModel) -> TableCommonProjection:
         "id": obj.id,  # type: ignore
         "created_at": obj.created_at.astimezone(UTC),  # type: ignore
         "updated_at": obj.updated_at.astimezone(UTC),  # type: ignore
-        "deleted_at": obj.deleted_at.astimezone(UTC),  # type: ignore
+        "deleted_at": obj.deleted_at.astimezone(UTC) if obj.deleted_at is not None else None,  # type: ignore
     }
 
 
@@ -142,7 +143,7 @@ def _project_table_common_dict(obj: dict[str, Any]) -> TableCommonProjection:
         "id": obj["id"],  # type: ignore
         "created_at": obj["created_at"].astimezone(UTC),  # type: ignore
         "updated_at": obj["updated_at"].astimezone(UTC),  # type: ignore
-        "deleted_at": obj["deleted_at"].astimezone(UTC),  # type: ignore
+        "deleted_at": obj["deleted_at"].astimezone(UTC) if obj["deleted_at"] is not None else None,  # type: ignore
     }
 
 
@@ -205,15 +206,15 @@ class DomainCommonProjection(TypedDict):
     id: UUID
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime
+    deleted_at: datetime | None
 
 
 def _project_domain_common(obj: DomainBaseModel) -> DomainCommonProjection:
     return {
         "id": UUID(bytes=obj.id.bytes),
-        "created_at": obj.created_at.astimezone(UTC),
-        "updated_at": obj.updated_at.astimezone(UTC),
-        "deleted_at": obj.deleted_at.astimezone(UTC),
+        "created_at": obj.created_at.astimezone(UTC).replace(tzinfo=None),
+        "updated_at": obj.updated_at.astimezone(UTC).replace(tzinfo=None),
+        "deleted_at": obj.deleted_at.astimezone(UTC).replace(tzinfo=None) if obj.deleted_at is not None else None,
     }
 
 
@@ -273,7 +274,9 @@ def _project_domain_user_to_table_user(obj: domain.User) -> tables.User:
     )
 
 
-def _project_domain_review_to_table_review(obj: domain.Review, area_id: domain.AreaID, user_id: domain.UserID) -> tables.Review:
+def _project_domain_review_to_table_review(
+    obj: domain.Review, area_id: domain.AreaID, user_id: domain.UserID
+) -> tables.Review:
     return tables.Review(
         **_project_domain_common(obj),
         rating=obj.rating,

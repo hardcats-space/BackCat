@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Protocol, TypedDict, Unpack
 
 from backcat import domain
@@ -25,17 +24,12 @@ class POIRepoImpl:
         self._ks = Keyspace("poi")
         self._cache = cache
 
-    async def create_poi(self, poi: domain.POI, camping_id: domain.CampingID) -> domain.POI:
-        pass
+    async def create_poi(self, poi: domain.POI, camping_id: domain.CampingID) -> domain.POI: ...
 
-    async def read_poi(self, poi_id: domain.POIID) -> domain.POI | None:
-        pass
+    async def read_poi(self, poi_id: domain.POIID) -> domain.POI | None: ...
 
-    async def read_pois(self, camping_id: domain.CampingID) -> list[domain.POI]:
-        pass
+    async def read_pois(self, camping_id: domain.CampingID) -> list[domain.POI]: ...
 
-    async def update_poi(self, poi_id: domain.POIID, **update: Unpack[UpdatePOI]) -> domain.POI:
-        pass
+    async def update_poi(self, poi_id: domain.POIID, **update: Unpack[UpdatePOI]) -> domain.POI: ...
 
-    async def delete_poi(self, poi_id: domain.POIID) -> domain.POI:
-        pass
+    async def delete_poi(self, poi_id: domain.POIID) -> domain.POI: ...

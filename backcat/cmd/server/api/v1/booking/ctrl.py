@@ -7,6 +7,7 @@ from backcat.cmd.server.api.v1.booking import dto
 
 class Controller(litestar.Controller):
     path = "/booking"
+    tags = ["booking"]
 
     @litestar.post("", dto=dto.CreateBookingRequest, return_dto=dto.CreateBookingResponse)
     async def create(self, data: DTOData[domain.Booking], area_id: domain.AreaID) -> domain.Booking:
