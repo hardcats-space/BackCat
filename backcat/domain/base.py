@@ -1,4 +1,5 @@
-from datetime import datetime
+import uuid
+from datetime import datetime, UTC
 from typing import Generic, Self, TypeVar
 
 from pydantic import UUID4, BaseModel, Extra, Field, ValidationError, model_validator
@@ -31,3 +32,21 @@ class DomainBaseModel(BaseModel, Generic[T], extra=Extra.ignore):
             raise ValidationError("deleted_at cannot be before created_at")
 
         return self
+
+
+class BaseFieldsFactory:
+    @classmethod
+    def id(cls) -> UUID4:
+        return uuid.uuid4()
+
+    @classmethod
+    def created_at(cls) -> datetime:
+        return datetime.now(UTC)
+
+    @classmethod
+    def updated_at(cls) -> datetime:
+        return datetime.now(UTC)
+
+    @classmethod
+    def deleted_at(cls) -> datetime | None:
+        return datetime.now(UTC)

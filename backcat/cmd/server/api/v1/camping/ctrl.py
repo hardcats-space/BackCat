@@ -10,20 +10,23 @@ class Controller(litestar.Controller):
 
     @litestar.post("", dto=dto.CreateCampingRequest, return_dto=dto.CreateCampingResponse)
     async def create(self, data: DTOData[domain.Camping]) -> domain.Camping:
-        raise NotImplementedError
+        return domain.camping.CampingFactory.build()
 
     @litestar.get("/{id:uuid}", return_dto=dto.ReadCampingResponse)
     async def read_one(self, id: domain.CampingID) -> domain.Camping:
-        raise NotImplementedError
+        return domain.camping.CampingFactory.build()
 
     @litestar.get("", return_dto=dto.ReadManyCampingResponse)
     async def read_many(self, group: dto.Group) -> dto._ReadManyCampings:
-        raise NotImplementedError
+        return dto._ReadManyCampings(data=[
+            dto._ReadManyCampingsItem(**domain.camping.CampingFactory.build().model_dump(), group=group)
+            for i in range(3)
+        ])
 
     @litestar.patch("/{id:uuid}", dto=dto.UpdateCampingRequest, return_dto=dto.UpdateCampingResponse)
     async def update(self, id: domain.CampingID, data: DTOData[domain.Camping]) -> domain.Camping:
-        raise NotImplementedError
+        return domain.camping.CampingFactory.build()
 
     @litestar.delete("/{id:uuid}")
     async def delete(self, id: domain.CampingID) -> None:
-        raise NotImplementedError
+        return None

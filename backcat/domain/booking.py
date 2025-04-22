@@ -1,10 +1,12 @@
-from datetime import datetime
+import random
+from datetime import datetime, UTC, timedelta
 from typing import Self
 
 from msgspec import ValidationError
+from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import Field, model_validator
 
-from backcat.domain.base import DomainBaseModel
+from backcat.domain.base import DomainBaseModel, BaseFieldsFactory
 from backcat.domain.id import BookingID
 
 
@@ -27,3 +29,13 @@ class Booking(DomainBaseModel[BookingID]):
             raise ValidationError("booked_till cannot be equal booked_since")
 
         return self
+
+
+class BookingFactory(ModelFactory[Booking], BaseFieldsFactory):
+    @classmethod
+    def booked_since(cls) -> datetime:
+        return datetime.now(UTC) + timedelta(days=random.randint(5, 15))
+
+    @classmethod
+    def booked_till(cls) -> datetime:
+        return datetime.now(UTC) + timedelta(days=random.randint(16, 25))

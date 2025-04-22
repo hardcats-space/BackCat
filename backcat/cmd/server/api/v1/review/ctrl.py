@@ -10,20 +10,20 @@ class Controller(litestar.Controller):
 
     @litestar.post("", dto=dto.CreateReviewRequest, return_dto=dto.CreateReviewResponse)
     async def create(self, data: DTOData[domain.Review], area_id: domain.AreaID) -> domain.Review:
-        raise NotImplementedError
+        return domain.review.ReviewFactory.build()
 
     @litestar.get("/{id:uuid}", return_dto=dto.ReadReviewResponse)
     async def read_one(self, id: domain.ReviewID) -> domain.Review:
-        raise NotImplementedError
+        return domain.review.ReviewFactory.build()
 
     @litestar.get("", return_dto=dto.ReadManyReviewResponse)
     async def read_many(self, area_id: domain.AreaID) -> dto._ReadManyReviews:
-        raise NotImplementedError
+        return dto._ReadManyReviews(data=[domain.review.ReviewFactory.build() for i in range(3)])
 
     @litestar.patch("/{id:uuid}", dto=dto.UpdateReviewRequest, return_dto=dto.UpdateReviewResponse)
     async def update(self, id: domain.ReviewID, data: DTOData[domain.Review]) -> domain.Review:
-        raise NotImplementedError
+        return domain.review.ReviewFactory.build()
 
     @litestar.delete("/{id:uuid}")
     async def delete(self, id: domain.ReviewID) -> None:
-        raise NotImplementedError
+        return None
