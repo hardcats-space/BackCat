@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, Timestamp, Varchar, SmallInt
+from piccolo.columns import UUID, Array, BigInt, DoublePrecision, ForeignKey, SmallInt, Timestamp, Varchar
 from piccolo.columns.defaults import TimestampNow
 from piccolo.columns.indexes import IndexMethod
 from piccolo.table import Table
@@ -71,7 +71,7 @@ class POI(Table, tablename="pois"):
     updated_at = Timestamp(auto_update=datetime.now, null=False)
     deleted_at = Timestamp(default=None, null=True)
 
-    kind = Varchar(choices=domain.POIKind, defalt=domain.POIKind.GENERAL, null=False)
+    kind = Varchar(choices=domain.POIKind, default=domain.POIKind.GENERAL, null=False)
     lat: DoublePrecision
     lon: DoublePrecision
     name = Varchar(length=150, null=True)
