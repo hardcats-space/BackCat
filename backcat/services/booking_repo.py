@@ -11,7 +11,9 @@ class UpdateBooking(TypedDict):
 
 
 class BookingRepo(Protocol):
-    async def create_booking(self, booking: domain.Booking, area_id: domain.AreaID, user_id: domain.UserID) -> domain.Booking: ...
+    async def create_booking(
+        self, booking: domain.Booking, area_id: domain.AreaID, user_id: domain.UserID
+    ) -> domain.Booking: ...
     async def read_booking(self, booking_id: domain.BookingID) -> domain.Booking | None: ...
     async def read_bookings(self, area_id: domain.AreaID, user_id: domain.UserID) -> list[domain.Booking]: ...
     async def update_booking(self, booking_id: domain.BookingID, **update: Unpack[UpdateBooking]) -> domain.Booking: ...
@@ -23,17 +25,14 @@ class BookingRepoImpl:
         self._ks = Keyspace("booking")
         self._cache = cache
 
-    async def create_booking(self, booking: domain.Booking, area_id: domain.AreaID, user_id: domain.UserID) -> domain.Booking:
-        pass
+    async def create_booking(
+        self, booking: domain.Booking, area_id: domain.AreaID, user_id: domain.UserID
+    ) -> domain.Booking: ...
 
-    async def read_booking(self, booking_id: domain.BookingID) -> domain.Booking | None:
-        pass
+    async def read_booking(self, booking_id: domain.BookingID) -> domain.Booking | None: ...
 
-    async def read_bookings(self, area_id: domain.AreaID, user_id: domain.UserID) -> list[domain.Booking]:
-        pass
+    async def read_bookings(self, area_id: domain.AreaID, user_id: domain.UserID) -> list[domain.Booking]: ...
 
-    async def update_booking(self, booking_id: domain.BookingID, **update: Unpack[UpdateBooking]) -> domain.Booking:
-        pass
+    async def update_booking(self, booking_id: domain.BookingID, **update: Unpack[UpdateBooking]) -> domain.Booking: ...
 
-    async def delete_booking(self, booking_id: domain.BookingID) -> domain.Booking:
-        pass
+    async def delete_booking(self, booking_id: domain.BookingID) -> domain.Booking: ...
