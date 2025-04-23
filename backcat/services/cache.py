@@ -30,6 +30,7 @@ T = TypeVar("T", bound=pydantic.BaseModel)
 
 
 class Cache:
+    LIVE_FEAT = timedelta(seconds=10)
     HOT_FEAT = timedelta(minutes=5)
     COLD_FEAT = timedelta(minutes=30)
 
