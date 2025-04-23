@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from textwrap import dedent
 from typing import Any, Protocol, override
 
 from asyncpg import DataError, UniqueViolationError
@@ -231,39 +232,60 @@ class CampingRepoImpl(CampingRepo):
                 query = query.where(database.Camping.user == filter.user_id)
 
             if filter.booked is not None and filter.booked:
-                # todo: rewrite using piccolo query builder
-                query = database.Camping.raw(f"""
+                query = database.Camping.raw(
+                    dedent(f"""
+                    with booked as (
+                        select
+                            b.{database.Booking.id._meta.db_column_name} as id,
+                            b.{database.Booking.user._meta.db_column_name} as user,
+                            b.{database.Booking.area._meta.db_column_name} as area
+                        from {database.Booking._meta.tablename} b
+                        where
+                            b.{database.Booking.user._meta.db_column_name} = '{filter.user_id or actor}'::uuid
+                            and b.{database.Booking.deleted_at._meta.db_column_name} is null
+                    ), booked_areas as (
+                        select
+                            a.{database.Area.id._meta.db_column_name} as id,
+                            a.{database.Area.camping._meta.db_column_name} as camping
+                        from {database.Area._meta.tablename} a
+                        inner join booked b on b.area = a.{database.Area.id._meta.db_column_name}
+                        where a.{database.Area.deleted_at._meta.db_column_name} is null
+                    )
                     select c.*
                     from {database.Camping._meta.tablename} c
-                    left join {database.Area._meta.tablename} a
-                        on a.{database.Area.camping._meta.db_column_name} = c.{database.Camping.id._meta.db_column_name}   
-                    left join {database.Booking._meta.tablename} b
-                        on b.{database.Booking.area._meta.db_column_name} = a.{database.Area.id._meta.db_column_name} 
-                    where
-                        b.{database.Booking.user._meta.db_column_name} = '{actor}'::uuid
-                        and b.{database.Booking.deleted_at._meta.db_column_name} is null
-                        and a.{database.Area.deleted_at._meta.db_column_name} is null
-                        and c.{database.Camping.deleted_at._meta.db_column_name} is null
-                """)
+                    inner join booked_areas a on a.camping = c.{database.Camping.id._meta.db_column_name}
+                    where {database.Camping.deleted_at._meta.db_column_name} is null;
+                """),
+                )
 
             if filter.booked is not None and not filter.booked:
-                # todo: rewrite using piccolo query builder
-                query = database.Camping.raw(f"""
+                query = database.Camping.raw(
+                    dedent(f"""
+                    with not_booked as (
+                        select
+                            b.{database.Booking.id._meta.db_column_name} as id,
+                            b.{database.Booking.user._meta.db_column_name} as user,
+                            b.{database.Booking.area._meta.db_column_name} as area
+                        from {database.Booking._meta.tablename} b
+                        where
+                            b.{database.Booking.user._meta.db_column_name} <> '{actor}'::uuid
+                            or b.{database.Booking.deleted_at._meta.db_column_name} is not null
+                    ), not_booked_areas as (
+                        select
+                            a.{database.Area.id._meta.db_column_name} as id,
+                            a.{database.Area.camping._meta.db_column_name} as camping
+                        from {database.Area._meta.tablename} a
+                        inner join not_booked b
+                            on b.area = a.{database.Area.id._meta.db_column_name}
+                    )
                     select c.*
                     from {database.Camping._meta.tablename} c
-                    left join {database.Area._meta.tablename} a
-                        on a.{database.Area.camping._meta.db_column_name} = c.{database.Camping.id._meta.db_column_name}   
-                    left join {database.Booking._meta.tablename} b
-                        on b.{database.Booking.area._meta.db_column_name} = a.{database.Area.id._meta.db_column_name} 
-                    where
-                        b is null or (
-                            b.{database.Booking.user._meta.db_column_name} <> '{actor}'::uuid
-                            and b.{database.Booking.deleted_at._meta.db_column_name} is null
-                            and a.{database.Area.deleted_at._meta.db_column_name} is null
-                            and c.{database.Camping.deleted_at._meta.db_column_name} is null
-                        )
+                    inner not_booked_areas a on a.camping = c.{database.Camping.id._meta.db_column_name}   
+                    where {database.Camping.deleted_at._meta.db_column_name} is null
                 """)
+                )
 
+            print(query)
             db_campings = await query.run()
             domain_campings = [database.projection(camping, cast_to=domain.Camping) for camping in db_campings]  # type: ignore
 
