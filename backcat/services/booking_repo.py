@@ -78,7 +78,7 @@ class BookingRepoImpl(BookingRepo):
         try:
             async with database.Booking._meta.db.transaction():
                 # Lock the area to prevent overlapping bookings
-                area_lock = await database.Area.objects().where(database.Area.id == area_id).lock_rows().first().run()
+                area_lock = await database.Area.objects().where(database.Area.id == area_id).lock_rows()
                 if not area_lock:
                     raise errors.NotFoundError("area not found")
 
@@ -92,7 +92,6 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.booked_till >= db_booking.booked_since,
                     )
                     .first()
-                    .run()
                 )
                 if collision:
                     raise errors.ConflictError("booking date collision detected")
@@ -136,7 +135,6 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.deleted_at.is_null(),
                     )
                     .first()
-                    .run()
                 )
                 if db_booking is None:
                     return None
@@ -177,7 +175,6 @@ class BookingRepoImpl(BookingRepo):
                     )
                     .lock_rows()
                     .first()
-                    .run()
                 )
                 if not booking_lock:
                     raise errors.NotFoundError("booking not found")
@@ -187,7 +184,6 @@ class BookingRepoImpl(BookingRepo):
                     .where(database.Area.id == booking_lock.area)
                     .lock_rows()
                     .first()
-                    .run()
                 )
                 if not area_lock:
                     raise errors.NotFoundError("area not found")
@@ -203,7 +199,6 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.booked_till >= update.booked_since,
                     )
                     .first()
-                    .run()
                 )
                 if collision:
                     raise errors.ConflictError("booking date collision detected")
