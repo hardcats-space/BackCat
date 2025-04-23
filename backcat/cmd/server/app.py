@@ -15,7 +15,7 @@ from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
 from litestar.security.jwt import OAuth2PasswordBearerAuth
 from piccolo.engine import engine_finder
 
-from backcat import domain, services
+from backcat import configs, domain, services
 from backcat.cmd.server import api, authorization
 from backcat.cmd.server.config import ServerConfig
 
@@ -23,13 +23,19 @@ config = ServerConfig()  # type: ignore
 
 provider = Provider(scope=Scope.APP)
 provider.provide(lambda: config, provides=ServerConfig)
-provider.provide(lambda: services.Cache(config.redis.dsn), provides=services.Cache)
+provider.provide(lambda: config.cors, provides=configs.CORS)
+provider.provide(lambda: config.csrf, provides=configs.CSRF)
+provider.provide(lambda: config.jwt, provides=configs.JWT)
+provider.provide(lambda: config.redis, provides=configs.Redis)
+provider.provide(lambda: config.s3, provides=configs.S3)
+provider.provide(services.Cache, provides=services.Cache)
 provider.provide(services.AreaRepoImpl, provides=services.AreaRepo)
 provider.provide(services.BookingRepoImpl, provides=services.BookingRepo)
 provider.provide(services.CampingRepoImpl, provides=services.CampingRepo)
 provider.provide(services.POIRepoImpl, provides=services.POIRepo)
 provider.provide(services.UserRepoImpl, provides=services.UserRepo)
 provider.provide(services.TokenRepoImpl, provides=services.TokenRepo)
+provider.provide(services.FileStorageImpl, provides=services.FileStorage)
 provider.provide(lambda: oauth2, provides=OAuth2PasswordBearerAuth[domain.User])  # note: global scope capture
 container = make_async_container(provider, LitestarProvider())
 

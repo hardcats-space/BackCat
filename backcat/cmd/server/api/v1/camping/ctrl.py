@@ -1,9 +1,12 @@
-from typing import Any
+from typing import Annotated, Any
 
 import litestar
 from dishka.integrations.litestar import FromDishka, inject
+from litestar.datastructures import UploadFile
 from litestar.dto import DTOData
+from litestar.enums import RequestEncodingType
 from litestar.exceptions import NotFoundException
+from litestar.params import Body
 
 from backcat import domain, services
 from backcat.cmd.server.api.v1.camping import dto
@@ -91,3 +94,26 @@ class Controller(litestar.Controller):
         camping_repo: FromDishka[services.CampingRepo],
     ) -> None:
         await camping_repo.delete_camping(request.user.id, id)
+
+    @litestar.post("/{id:uuid}/thumbnail", return_dto=dto.UpdateCampingResponse)
+    @inject
+    async def add_thumbnail(
+        self,
+        id: domain.CampingID,
+        request: litestar.Request[domain.User, Any, Any],
+        data: Annotated[UploadFile, Body(media_type=RequestEncodingType.MULTI_PART)],
+        camping_repo: FromDishka[services.CampingRepo],
+    ) -> domain.Camping:
+        content = await data.read()
+        return await camping_repo.upload_thumbnail(request.user.id, id, content)  # type: ignore
+
+    @litestar.delete("/{id:uuid}/thumbnail/{index:int}", return_dto=dto.UpdateCampingResponse, status_code=200)
+    @inject
+    async def remove_thumbnail(
+        self,
+        id: domain.CampingID,
+        index: int,
+        request: litestar.Request[domain.User, Any, Any],
+        camping_repo: FromDishka[services.CampingRepo],
+    ) -> domain.Camping:
+        return await camping_repo.remove_thumbnail(request.user.id, id, index)

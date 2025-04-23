@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
+from pathlib import Path
 from textwrap import dedent
 from typing import Any, Protocol, override
+from uuid import uuid4
 
 from asyncpg import DataError, UniqueViolationError
 from piccolo.columns import Column
@@ -10,6 +12,7 @@ from backcat import database, domain
 from backcat.domain import Point
 from backcat.services import errors
 from backcat.services.cache import Cache, Keyspace
+from backcat.services.filestorage import FileStorage
 
 
 class UpdateCamping(BaseModel):
@@ -56,11 +59,33 @@ class CampingRepo(Protocol):
         camping_id: domain.CampingID,
     ) -> domain.Camping: ...
 
+    async def add_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail: str,
+    ) -> domain.Camping: ...
+
+    async def upload_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail: bytes,
+    ) -> domain.Camping: ...
+
+    async def remove_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail_index: int,
+    ) -> domain.Camping: ...
+
 
 class CampingRepoImpl(CampingRepo):
-    def __init__(self, cache: Cache):
+    def __init__(self, cache: Cache, file_storage: FileStorage):
         self._ks = Keyspace("camping")
         self._cache = cache
+        self._fs = file_storage
 
     @override
     async def create_camping(
@@ -170,7 +195,7 @@ class CampingRepoImpl(CampingRepo):
             raise errors.ConflictError("invalid data object") from e
         except IndexError as e:
             # index error means that no row was updated
-            raise errors.InternalServerError("update failed") from e
+            raise errors.NotFoundError("no such camping found") from e
         except database.ProjectionError as e:
             # projection error means that the domain model was not converted to db data
             raise errors.ValidationError("invalid camping") from e
@@ -298,3 +323,181 @@ class CampingRepoImpl(CampingRepo):
             raise errors.InternalServerError("failed to read camping") from e
         except Exception as e:
             raise errors.InternalServerError("failed to read camping") from e
+
+    @override
+    async def add_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail: str,
+    ) -> domain.Camping:
+        try:
+            await self._cache.invalidate(self._ks.key(camping_id.hex))
+
+            async with database.Camping._meta.db.transaction():
+                camping: database.Camping | None = (
+                    await database.Camping.objects()
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .first()
+                    .lock_rows()
+                )  # type: ignore
+                if camping is None:
+                    raise errors.NotFoundError("no such camping found")
+
+                if len(camping.thumbnails) >= 5:
+                    raise errors.ConflictError("too many thumbnails")
+
+                db_camping = (
+                    await database.Camping.update({
+                        database.Camping.thumbnails: database.Camping.thumbnails + [thumbnail]
+                    })
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .returning(*database.Camping.all_columns())
+                    .run()
+                )[0]
+
+                domain_camping = database.projection(db_camping, cast_to=domain.Camping)
+
+                await self._cache.set(self._ks.key(domain_camping.id.hex), domain_camping, expire=self._cache.HOT_FEAT)
+
+            return domain_camping
+        except errors.ServiceError as e:
+            raise e from e
+        except IndexError as e:
+            # index error means that no row was updated
+            raise errors.NotFoundError("no such camping found") from e
+        except database.ProjectionError as e:
+            # projection error means that the domain model was not converted to db data
+            raise errors.ValidationError("invalid camping") from e
+        except Exception as e:
+            raise errors.InternalServerError("failed to update camping") from e
+
+    @override
+    async def upload_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail: bytes,
+    ) -> domain.Camping:
+        try:
+            await self._cache.invalidate(self._ks.key(camping_id.hex))
+
+            async with database.Camping._meta.db.transaction():
+                camping: database.Camping | None = (
+                    await database.Camping.objects()
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .first()
+                    .lock_rows()
+                )  # type: ignore
+                if camping is None:
+                    raise errors.NotFoundError("no such camping found")
+
+                if len(camping.thumbnails) >= 5:
+                    raise errors.ConflictError("too many thumbnails")
+
+                filepath = Path("campings") / camping_id.hex / uuid4().hex
+                await self._fs.upload(filepath, thumbnail)
+
+                thumbnail_url = await self._fs.get_url(filepath)
+
+                db_camping = (
+                    await database.Camping.update({
+                        database.Camping.thumbnails: database.Camping.thumbnails + [thumbnail_url]
+                    })
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .returning(*database.Camping.all_columns())
+                    .run()
+                )[0]
+
+                domain_camping = database.projection(db_camping, cast_to=domain.Camping)
+
+                await self._cache.set(self._ks.key(domain_camping.id.hex), domain_camping, expire=self._cache.HOT_FEAT)
+
+            return domain_camping
+        except errors.ServiceError as e:
+            raise e from e
+        except IndexError as e:
+            # index error means that no row was updated
+            raise errors.NotFoundError("no such camping found") from e
+        except database.ProjectionError as e:
+            # projection error means that the domain model was not converted to db data
+            raise errors.ValidationError("invalid camping") from e
+        except Exception as e:
+            raise errors.InternalServerError("failed to update camping") from e
+
+    @override
+    async def remove_thumbnail(
+        self,
+        actor: domain.UserID,
+        camping_id: domain.CampingID,
+        thumbnail_index: int,
+    ) -> domain.Camping:
+        if thumbnail_index < 0:
+            raise errors.ValidationError("invalid thumbnail index")
+        if thumbnail_index >= 5:
+            raise errors.ValidationError("invalid thumbnail index")
+
+        try:
+            await self._cache.invalidate(self._ks.key(camping_id.hex))
+
+            async with database.Camping._meta.db.transaction():
+                camping: database.Camping | None = (
+                    await database.Camping.objects()
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .first()
+                    .lock_rows()
+                )  # type: ignore
+                if camping is None:
+                    raise errors.NotFoundError("no such camping found")
+
+                if len(camping.thumbnails) >= thumbnail_index:
+                    camping.thumbnails.pop(thumbnail_index)
+                else:
+                    raise errors.NotFoundError("no such thumbnail found")
+
+                db_camping = (
+                    await database.Camping.update({database.Camping.thumbnails: camping.thumbnails})
+                    .where(
+                        database.Camping.id == camping_id,
+                        database.Camping.user == actor,
+                        database.Camping.deleted_at.is_null(),
+                    )
+                    .returning(*database.Camping.all_columns())
+                    .run()
+                )[0]
+
+                domain_camping = database.projection(db_camping, cast_to=domain.Camping)
+
+                await self._cache.set(self._ks.key(domain_camping.id.hex), domain_camping, expire=self._cache.HOT_FEAT)
+
+            return domain_camping
+        except errors.ServiceError as e:
+            raise e from e
+        except IndexError as e:
+            # index error means that no row was updated
+            raise errors.NotFoundError("no such camping found") from e
+        except database.ProjectionError as e:
+            # projection error means that the domain model was not converted to db data
+            raise errors.ValidationError("invalid camping") from e
+        except Exception as e:
+            raise errors.InternalServerError("failed to update camping") from e

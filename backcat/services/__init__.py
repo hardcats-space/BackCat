@@ -4,6 +4,7 @@ from . import cache as cache
 from . import camping_repo as camping_repo
 from . import dataloader as dataloader
 from . import errors as errors
+from . import filestorage as filestorage
 from . import poi_repo as poi_repo
 from . import review_repo as review_repo
 from . import token as token
@@ -15,6 +16,8 @@ from .cache import Key as Key
 from .cache import Keyspace as Keyspace
 from .camping_repo import CampingRepo, CampingRepoImpl
 from .errors import ConflictError, ConversionError, InternalServerError, NotFoundError, ValidationError
+from .filestorage import FileStorage as FileStorage
+from .filestorage import FileStorageImpl as FileStorageImpl
 from .poi_repo import POIRepo, POIRepoImpl
 from .token import TokenRepo as TokenRepo
 from .token import TokenRepoImpl as TokenRepoImpl
