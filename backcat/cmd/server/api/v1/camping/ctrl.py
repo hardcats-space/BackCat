@@ -107,7 +107,7 @@ class Controller(litestar.Controller):
         content = await data.read()
         return await camping_repo.upload_thumbnail(request.user.id, id, content)  # type: ignore
 
-    @litestar.patch("/{id:uuid}/thumbnail/{index:int}", return_dto=dto.UpdateCampingResponse)
+    @litestar.delete("/{id:uuid}/thumbnail/{index:int}", return_dto=dto.UpdateCampingResponse, status_code=200)
     @inject
     async def remove_thumbnail(
         self,
