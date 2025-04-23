@@ -36,6 +36,7 @@ provider.provide(services.POIRepoImpl, provides=services.POIRepo)
 provider.provide(services.UserRepoImpl, provides=services.UserRepo)
 provider.provide(services.TokenRepoImpl, provides=services.TokenRepo)
 provider.provide(services.FileStorageImpl, provides=services.FileStorage)
+provider.provide(services.ReviewRepoImpl, provides=services.ReviewRepo)
 provider.provide(lambda: oauth2, provides=OAuth2PasswordBearerAuth[domain.User])  # note: global scope capture
 container = make_async_container(provider, LitestarProvider())
 
@@ -84,6 +85,7 @@ app = Litestar(
                 api.v1.camping.Controller,
                 api.v1.health.Controller,
                 api.v1.poi.Controller,
+                api.v1.review.Controller,
                 api.v1.user.Controller,
             ],
         ),
