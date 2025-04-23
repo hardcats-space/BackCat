@@ -57,7 +57,7 @@ def projection(obj: domain.Camping, *, user_id: domain.UserID) -> tables.Camping
 
 
 @overload
-def projection(obj: domain.POI, *, camping_id: domain.CampingID) -> tables.POI: ...
+def projection(obj: domain.POI, *, camping_id: domain.CampingID, user_id: domain.UserID) -> tables.POI: ...
 
 
 @overload
@@ -96,8 +96,10 @@ def projection(  # noqa: C901
                 raise ProjectionError("user_id is required for projection from domain.Area")
             return _project_domain_area_to_table_area(obj, camping_id, user_id)
         case domain.Booking():
-            if area_id is None or user_id is None:
-                raise ProjectionError("area_id and user_id are required for projection from domain.Booking")
+            if area_id is None:
+                raise ProjectionError("area_id is required for projection from domain.Booking")
+            if user_id is None:
+                raise ProjectionError("user_id is required for projection from domain.Booking")
             return _project_domain_booking_to_table_booking(obj, area_id, user_id)
         case domain.Camping():
             if user_id is None:
@@ -106,12 +108,16 @@ def projection(  # noqa: C901
         case domain.POI():
             if camping_id is None:
                 raise ProjectionError("camping_id is required for projection from domain.POI")
-            return _project_domain_poi_to_table_poi(obj, camping_id)
+            if user_id is None:
+                raise ProjectionError("user_id is required for projection from domain.POI")
+            return _project_domain_poi_to_table_poi(obj, camping_id, user_id)
         case domain.User():
             return _project_domain_user_to_table_user(obj)
         case domain.Review():
-            if area_id is None or user_id is None:
-                raise ProjectionError("area_id and user_id are required for projection from domain.Review")
+            if area_id is None:
+                raise ProjectionError("area_id is required for projection from domain.Review")
+            if user_id is None:
+                raise ProjectionError("user_id is required for projection from domain.Review")
             return _project_domain_review_to_table_review(obj, area_id, user_id)
 
         case dict():
@@ -257,7 +263,9 @@ def _project_domain_camping_to_table_camping(obj: domain.Camping, user_id: domai
     )
 
 
-def _project_domain_poi_to_table_poi(obj: domain.POI, camping_id: domain.CampingID) -> tables.POI:
+def _project_domain_poi_to_table_poi(
+    obj: domain.POI, camping_id: domain.CampingID, user_id: domain.UserID
+) -> tables.POI:
     return tables.POI(
         **_project_domain_common(obj),
         kind=obj.kind.value,
@@ -266,6 +274,7 @@ def _project_domain_poi_to_table_poi(obj: domain.POI, camping_id: domain.Camping
         name=obj.name,
         description=obj.description,
         camping=camping_id,
+        user=user_id,
     )
 
 

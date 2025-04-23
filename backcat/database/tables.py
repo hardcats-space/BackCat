@@ -78,6 +78,7 @@ class POI(Table, tablename="pois"):
     name = Varchar(length=150, null=True)
     description = Varchar(length=5000, null=True)
 
+    user = ForeignKey(references=User, null=False, target_column=User.id)
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this poi is located"""
 

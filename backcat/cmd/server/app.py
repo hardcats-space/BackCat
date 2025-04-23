@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import timedelta
 
+import litestar
 import piccolo.apps.migrations.commands.forwards
 from dishka import Provider, Scope, make_async_container
 from dishka.integrations.litestar import LitestarProvider, setup_dishka
@@ -36,6 +37,7 @@ provider.provide(services.POIRepoImpl, provides=services.POIRepo)
 provider.provide(services.UserRepoImpl, provides=services.UserRepo)
 provider.provide(services.TokenRepoImpl, provides=services.TokenRepo)
 provider.provide(services.FileStorageImpl, provides=services.FileStorage)
+provider.provide(services.ReviewRepoImpl, provides=services.ReviewRepo)
 provider.provide(lambda: oauth2, provides=OAuth2PasswordBearerAuth[domain.User])  # note: global scope capture
 container = make_async_container(provider, LitestarProvider())
 
@@ -73,6 +75,17 @@ async def lifespan(app: Litestar):
     await app.state.dishka_container.close()
 
 
+def service_error_handler(
+    request: litestar.Request,
+    exc: services.errors.ServiceError,
+) -> litestar.Response:
+    if len(exc.args) != 0:
+        # if the error has a message, return it
+        return litestar.Response(status_code=exc.status_code, content={"detail": exc.args[0]})
+
+    return litestar.Response(status_code=exc.status_code, content={"detail": exc.__doc__})
+
+
 app = Litestar(
     debug=config.log.level == "DEBUG",
     route_handlers=[
@@ -84,6 +97,7 @@ app = Litestar(
                 api.v1.camping.Controller,
                 api.v1.health.Controller,
                 api.v1.poi.Controller,
+                api.v1.review.Controller,
                 api.v1.user.Controller,
             ],
         ),
@@ -137,6 +151,7 @@ app = Litestar(
     ),
     lifespan=[lifespan],
     on_app_init=[oauth2.on_app_init],
+    exception_handlers={services.errors.ServiceError: service_error_handler},
 )
 
 
