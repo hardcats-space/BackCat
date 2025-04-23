@@ -9,7 +9,9 @@ authors = [
     { name = "Anton Kudryavtsev", email = "dartt0n@ya.ru" },
 ]
 dependencies = [
+    "aiobotocore>=2.14,<2.15",
     "argon2-cffi>=23.1.0",
+    "botocore>=1.35.0,<1.36",
     "dishka>=1.5.2",
     "granian>=2.1.2",
     "litestar[jwt,opentelemetry,prometheus,standard]>=2.15.1",

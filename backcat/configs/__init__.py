@@ -3,8 +3,10 @@ from . import csrf as csrf
 from . import jwt as jwt
 from . import log as log
 from . import redis as redis
+from . import s3 as s3
 from .cors import CORS as CORS
 from .csrf import CSRF as CSRF
 from .jwt import JWT as JWT
 from .log import Log as Log
 from .redis import Redis as Redis
+from .s3 import S3 as S3

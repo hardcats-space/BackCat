@@ -8,6 +8,8 @@ from typing import Any, TypeVar, overload
 import pydantic
 from redis.asyncio import Redis
 
+from backcat import configs
+
 
 @dataclass
 class Keyspace:
@@ -34,8 +36,9 @@ class Cache:
     HOT_FEAT = timedelta(minutes=5)
     COLD_FEAT = timedelta(minutes=30)
 
-    def __init__(self, redis_dns: pydantic.RedisDsn):
-        self._redis = Redis.from_url(redis_dns.unicode_string())
+    def __init__(self, cfg: configs.Redis):
+        self._cfg = cfg
+        self._redis = Redis.from_url(cfg.dsn.unicode_string())
 
     @overload
     async def get(self, key: Key, *, silent: bool = True) -> dict[str, Any] | None: ...

@@ -12,6 +12,7 @@ class ServerConfig(BaseSettings):
     csrf: configs.CSRF
     jwt: configs.JWT
     redis: configs.Redis
+    s3: configs.S3
 
     # config loading options
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
