@@ -14,8 +14,8 @@ from backcat.services.cache import Cache, Keyspace
 
 
 class UpdateBooking(BaseModel):
-    booked_since: datetime
-    booked_till: datetime
+    booked_since: datetime | None = None
+    booked_till: datetime | None = None
 
 
 class FilterBooking(BaseModel):
@@ -139,10 +139,11 @@ class BookingRepoImpl(BookingRepo):
         try:
             await self._cache.invalidate(self._ks.key(booking_id.hex))
 
-            values: dict[Column | str, Any] = {
-                database.Booking.booked_since: update.booked_since,
-                database.Booking.booked_till: update.booked_till,
-            }
+            values: dict[Column | str, Any] = {}
+            if "booked_since" in update.model_fields_set and update.booked_since is not None:
+                values[database.Booking.booked_since] = update.booked_since
+            if "booked_till" in update.model_fields_set and update.booked_till is not None:
+                values[database.Booking.booked_till] = update.booked_till
 
             async with database.Booking._meta.db.transaction():
                 db_booking = (
