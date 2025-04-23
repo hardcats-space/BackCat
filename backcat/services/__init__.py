@@ -22,3 +22,4 @@ from .poi_repo import POIRepo, POIRepoImpl
 from .token import TokenRepo as TokenRepo
 from .token import TokenRepoImpl as TokenRepoImpl
 from .user_repo import UserRepo, UserRepoImpl
+from .review_repo import ReviewRepo, ReviewRepoImpl
