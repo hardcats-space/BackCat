@@ -35,7 +35,7 @@ class CORS(BaseModel):
             return allow_methods
 
         for method in allow_methods:
-            if method not in ["GET", "POST", "PUT", "DELETE", "OPTIONS"]:
+            if method not in ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]:
                 raise ValidationError(f"Invalid CORS method: {method}")
 
         return allow_methods
