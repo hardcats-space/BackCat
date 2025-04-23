@@ -77,7 +77,7 @@ class BookingRepoImpl(BookingRepo):
         try:
             async with database.Booking._meta.db.transaction():
                 # Lock the area to prevent overlapping bookings
-                area_lock = await database.Area.objects().where(database.Area.id == area_id).for_update().first().run()
+                area_lock = await database.Area.objects().where(database.Area.id == area_id).lock_rows().first().run()
                 if not area_lock:
                     raise errors.NotFoundError("area not found")
 
@@ -90,7 +90,7 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.booked_since <= db_booking.booked_till,
                         database.Booking.booked_till >= db_booking.booked_since,
                     )
-                    .exists()
+                    .first()
                     .run()
                 )
                 if collision:
@@ -172,7 +172,7 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.deleted_at.is_null(),
                         database.Booking.user == actor,
                     )
-                    .for_update()
+                    .lock_rows()
                     .first()
                     .run()
                 )
@@ -182,7 +182,7 @@ class BookingRepoImpl(BookingRepo):
                 area_lock = (
                     await database.Area.objects()
                     .where(database.Area.id == booking_lock.area)
-                    .for_update()
+                    .lock_rows()
                     .first()
                     .run()
                 )
@@ -199,7 +199,7 @@ class BookingRepoImpl(BookingRepo):
                         database.Booking.booked_since <= update.booked_till,
                         database.Booking.booked_till >= update.booked_since,
                     )
-                    .exists()
+                    .first()
                     .run()
                 )
                 if collision:
