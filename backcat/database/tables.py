@@ -60,6 +60,7 @@ class Area(Table, tablename="areas"):
     price_amount = BigInt(null=False)
     price_currency = Varchar(length=3, null=False)
 
+    user = ForeignKey(references=User, null=False, target_column=User.id)
     camping = ForeignKey(references=Camping, null=False, target_column=Camping.id)
     """camping in which this area is available for booking"""
 

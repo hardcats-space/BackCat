@@ -30,6 +30,7 @@ T = TypeVar("T", bound=pydantic.BaseModel)
 
 
 class Cache:
+    LIVE_FEAT = timedelta(seconds=10)
     HOT_FEAT = timedelta(minutes=5)
     COLD_FEAT = timedelta(minutes=30)
 
@@ -75,5 +76,9 @@ class Cache:
             if not silent:
                 raise e
 
-    async def invalidate(self, key: Key):
-        await self._redis.delete(key.as_str())
+    async def invalidate(self, key: Key, silent: bool = True):
+        try:
+            await self._redis.delete(key.as_str())
+        except Exception as e:
+            if not silent:
+                raise e

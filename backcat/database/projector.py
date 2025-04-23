@@ -45,7 +45,7 @@ def projection(obj: tables.Review) -> domain.Review: ...
 
 
 @overload
-def projection(obj: domain.Area, *, camping_id: domain.CampingID) -> tables.Area: ...
+def projection(obj: domain.Area, *, camping_id: domain.CampingID, user_id: domain.UserID) -> tables.Area: ...
 
 
 @overload
@@ -92,7 +92,9 @@ def projection(  # noqa: C901
         case domain.Area():
             if camping_id is None:
                 raise ProjectionError("camping_id is required for projection from domain.Area")
-            return _project_domain_area_to_table_area(obj, camping_id)
+            if user_id is None:
+                raise ProjectionError("user_id is required for projection from domain.Area")
+            return _project_domain_area_to_table_area(obj, camping_id, user_id)
         case domain.Booking():
             if area_id is None or user_id is None:
                 raise ProjectionError("area_id and user_id are required for projection from domain.Booking")
@@ -218,7 +220,9 @@ def _project_domain_common(obj: DomainBaseModel) -> DomainCommonProjection:
     }
 
 
-def _project_domain_area_to_table_area(obj: domain.Area, camping_id: domain.CampingID) -> tables.Area:
+def _project_domain_area_to_table_area(
+    obj: domain.Area, camping_id: domain.CampingID, user_id: domain.UserID
+) -> tables.Area:
     return tables.Area(
         **_project_domain_common(obj),
         polygon=[[point.lat, point.lon] for point in obj.polygon],
@@ -226,6 +230,7 @@ def _project_domain_area_to_table_area(obj: domain.Area, camping_id: domain.Camp
         price_amount=obj.price.amount,
         price_currency=str(obj.price.currency),
         camping=camping_id,
+        user=user_id,
     )
 
 
