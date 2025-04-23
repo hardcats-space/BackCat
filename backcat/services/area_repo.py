@@ -99,7 +99,7 @@ class AreaRepoImpl(AreaRepo):
             if domain_area is not None:
                 return domain_area
 
-            async with database.Camping._meta.db.transaction():
+            async with database.Area._meta.db.transaction():
                 db_area = (
                     await database.Area.objects()
                     .where(
@@ -195,7 +195,7 @@ class AreaRepoImpl(AreaRepo):
             # projection error means that the domain model was not converted to db data
             raise errors.ValidationError("invalid area") from e
         except Exception as e:
-            raise errors.InternalServerError("failed to update area") from e
+            raise errors.InternalServerError("failed to delete area") from e
 
     async def filter_area(
         self,
