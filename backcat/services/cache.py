@@ -76,5 +76,9 @@ class Cache:
             if not silent:
                 raise e
 
-    async def invalidate(self, key: Key):
-        await self._redis.delete(key.as_str())
+    async def invalidate(self, key: Key, silent: bool = True):
+        try:
+            await self._redis.delete(key.as_str())
+        except Exception as e:
+            if not silent:
+                raise e

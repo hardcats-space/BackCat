@@ -153,7 +153,7 @@ class CampingRepoImpl(CampingRepo):
                     await database.Camping.update(values)
                     .where(
                         database.Camping.id == camping_id,
-                        database.Camping.user._.id == actor,
+                        database.Camping.user == actor,
                         database.Camping.deleted_at.is_null(),
                     )
                     .returning(*database.Camping.all_columns())
@@ -191,7 +191,7 @@ class CampingRepoImpl(CampingRepo):
                     await database.Camping.update({database.Camping.deleted_at: datetime.now(UTC)})
                     .where(
                         database.Camping.id == camping_id,
-                        database.Camping.user._.id == actor,
+                        database.Camping.user == actor,
                         database.Camping.deleted_at.is_null(),
                     )
                     .returning(*database.Camping.all_columns())
@@ -285,7 +285,6 @@ class CampingRepoImpl(CampingRepo):
                 """)
                 )
 
-            print(query)
             db_campings = await query.run()
             domain_campings = [database.projection(camping, cast_to=domain.Camping) for camping in db_campings]  # type: ignore
 

@@ -30,4 +30,4 @@ class _ReadManyAreas(BaseModel):
 
 
 class ReadManyAreasResponse(PydanticDTO[_ReadManyAreas]):
-    config = DTOConfig(rename_strategy="camel")
+    config = DTOConfig(rename_strategy="camel", max_nested_depth=3)
