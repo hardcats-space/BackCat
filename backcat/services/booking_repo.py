@@ -11,6 +11,7 @@ from backcat import domain
 from backcat.database.projector import ProjectionError, projection
 from backcat.services import errors
 from backcat.services.cache import Cache, Keyspace
+from backcat.services.errors import ServiceError
 
 
 class UpdateBooking(BaseModel):
@@ -112,6 +113,8 @@ class BookingRepoImpl(BookingRepo):
             raise errors.InternalServerError("insertion failed") from e
         except ProjectionError as e:
             raise errors.ConversionError("invalid booking") from e
+        except ServiceError as e:
+            raise e
         except Exception as e:
             raise errors.InternalServerError("failed to insert booking") from e
 
@@ -227,6 +230,8 @@ class BookingRepoImpl(BookingRepo):
             raise errors.NotFoundError("no such booking") from e
         except ProjectionError as e:
             raise errors.ValidationError("invalid booking") from e
+        except ServiceError as e:
+            raise e
         except Exception as e:
             raise errors.InternalServerError("failed to update booking") from e
 

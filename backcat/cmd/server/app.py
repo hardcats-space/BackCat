@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import timedelta
 
+import litestar
 import piccolo.apps.migrations.commands.forwards
 from dishka import Provider, Scope, make_async_container
 from dishka.integrations.litestar import LitestarProvider, setup_dishka
@@ -74,6 +75,17 @@ async def lifespan(app: Litestar):
     await app.state.dishka_container.close()
 
 
+def service_error_handler(
+    request: litestar.Request,
+    exc: services.errors.ServiceError,
+) -> litestar.Response:
+    if len(exc.args) != 0:
+        # if the error has a message, return it
+        return litestar.Response(status_code=exc.status_code, content={"detail": exc.args[0]})
+
+    return litestar.Response(status_code=exc.status_code, content={"detail": exc.__doc__})
+
+
 app = Litestar(
     debug=config.log.level == "DEBUG",
     route_handlers=[
@@ -139,6 +151,7 @@ app = Litestar(
     ),
     lifespan=[lifespan],
     on_app_init=[oauth2.on_app_init],
+    exception_handlers={services.errors.ServiceError: service_error_handler},
 )
 
 
