@@ -76,7 +76,25 @@ class BookingRepoImpl(BookingRepo):
 
         try:
             async with database.Booking._meta.db.transaction():
-                # TODO: Add date collision check
+                # Lock the area to prevent overlapping bookings
+                area_lock = await database.Area.objects().where(database.Area.id == area_id).for_update().first().run()
+                if not area_lock:
+                    raise errors.NotFoundError("area not found")
+
+                # Check for date collisions
+                collision = (
+                    await database.Booking.objects()
+                    .where(
+                        database.Booking.area == area_id,
+                        database.Booking.deleted_at.is_null(),
+                        database.Booking.booked_since <= db_booking.booked_till,
+                        database.Booking.booked_till >= db_booking.booked_since,
+                    )
+                    .exists()
+                    .run()
+                )
+                if collision:
+                    raise errors.ConflictError("booking date collision detected")
 
                 db_booking = (
                     await database.Booking.insert(db_booking).returning(*database.Booking.all_columns()).run()
@@ -146,6 +164,47 @@ class BookingRepoImpl(BookingRepo):
                 values[database.Booking.booked_till] = update.booked_till
 
             async with database.Booking._meta.db.transaction():
+                # Lock the booking and area to prevent conflicts
+                booking_lock = (
+                    await database.Booking.objects()
+                    .where(
+                        database.Booking.id == booking_id,
+                        database.Booking.deleted_at.is_null(),
+                        database.Booking.user == actor,
+                    )
+                    .for_update()
+                    .first()
+                    .run()
+                )
+                if not booking_lock:
+                    raise errors.NotFoundError("booking not found")
+
+                area_lock = (
+                    await database.Area.objects()
+                    .where(database.Area.id == booking_lock.area)
+                    .for_update()
+                    .first()
+                    .run()
+                )
+                if not area_lock:
+                    raise errors.NotFoundError("area not found")
+
+                # Check for date collisions
+                collision = (
+                    await database.Booking.objects()
+                    .where(
+                        database.Booking.area == booking_lock.area,
+                        database.Booking.id != booking_id,
+                        database.Booking.deleted_at.is_null(),
+                        database.Booking.booked_since <= update.booked_till,
+                        database.Booking.booked_till >= update.booked_since,
+                    )
+                    .exists()
+                    .run()
+                )
+                if collision:
+                    raise errors.ConflictError("booking date collision detected")
+
                 db_booking = (
                     await database.Booking.update(values)
                     .where(
