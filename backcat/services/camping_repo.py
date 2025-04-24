@@ -165,7 +165,7 @@ class CampingRepoImpl(CampingRepo):
 
             values: dict[Column | str, Any] = {}
             if "polygon" in update.model_fields_set and update.polygon is not None:
-                values[database.Camping.polygon] = update.polygon
+                values[database.Camping.polygon] = [[point.lat, point.lon] for point in update.polygon]
             if "title" in update.model_fields_set and update.title is not None:
                 values[database.Camping.title] = update.title
             if "description" in update.model_fields_set and update.description is not None:
