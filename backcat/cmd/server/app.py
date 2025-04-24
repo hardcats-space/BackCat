@@ -50,6 +50,7 @@ oauth2 = OAuth2PasswordBearerAuth[domain.User](
         "/api/v1/user/oauth2/token",
         "/api/v1/user/sign-in",
         "/api/v1/user/sign-up",
+        "/api/v1/health",
         "/api/schema/*",
         "/api/extra/*",
     ],
