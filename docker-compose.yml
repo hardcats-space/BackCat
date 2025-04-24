@@ -3,6 +3,10 @@ volumes:
     driver: local
   redis:
     driver: local
+  prometheus:
+    driver: local
+  grafana:
+    driver: local
 
 services:
   postgres:
@@ -15,7 +19,7 @@ services:
       retries: 5
       timeout: 5s
     ports:
-      - 5432:5432
+      - 127.0.0.1:10802:5432
     volumes:
       - database:/var/lib/postgresql/data
       - ./init.sh/:/docker-entrypoint-initdb.d/init.sh
@@ -31,6 +35,8 @@ services:
     image: docker.io/library/redis:alpine
     command: --save 60 1 --loglevel warning
     restart: unless-stopped
+    ports:
+      - 127.0.0.1:10803:6379
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       start_period: 20s
@@ -41,10 +47,11 @@ services:
       - redis:/data
 
   backcat_server:
+    image: cr.yandex/crpi9mn4oi4e8mmo9s1a/backcat:latest
     build:
       context: .
       dockerfile: dockerfile
-    container_name: blackcat-server
+    container_name: backcat-server
     restart: unless-stopped
     ports:
       - 127.0.0.1:10804:8080
@@ -71,3 +78,56 @@ services:
     command: ["uv", "-q", "run", "granian", "backcat.cmd.server:app"]
     depends_on:
       - postgres
+
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    container_name: hardcats-prometheus
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:10805:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - .prometheus:/prometheus
+
+  grafana:
+    image: grafana/grafana-oss:11.6.1
+    container_name: hardcats-grafana
+    restart: unless-stopped
+    environment:
+      GF_PLUGINS_PREINSTALL: grafana-clock-panel,grafana-simple-json-datasource
+      GF_LOG_MODE: console file
+
+    ports:
+      - 127.0.0.1:10806:3000
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana.ini:/etc/grafana/grafana.ini
+
+  node_exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: hardcats-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    ports:
+      - 127.0.0.1:10807:9100
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    container_name: hardcats-cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - 127.0.0.1:10808:8080
