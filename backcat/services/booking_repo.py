@@ -180,10 +180,7 @@ class BookingRepoImpl(BookingRepo):
                     raise errors.NotFoundError("booking not found")
 
                 area_lock = (
-                    await database.Area.objects()
-                    .where(database.Area.id == booking_lock.area)
-                    .lock_rows()
-                    .first()
+                    await database.Area.objects().where(database.Area.id == booking_lock.area).lock_rows().first()
                 )
                 if not area_lock:
                     raise errors.NotFoundError("area not found")
