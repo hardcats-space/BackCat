@@ -49,26 +49,30 @@ class Controller(litestar.Controller):
         group: dto.Group,
         request: litestar.Request[domain.User, Any, Any],
         camping_repo: FromDishka[services.CampingRepo],
-    ) -> list[domain.Camping]:
+    ) -> dto._ReadManyCampings:
+        campings = []
+
         if group == "all":
-            return await camping_repo.filter_camping(
+            campings = await camping_repo.filter_camping(
                 request.user.id,
                 services.camping_repo.FilterCamping(),
             )
 
         if group == "my":
-            return await camping_repo.filter_camping(
+            campings = await camping_repo.filter_camping(
                 request.user.id,
                 services.camping_repo.FilterCamping(user_id=request.user.id),
             )
 
         if group == "booked":
-            return await camping_repo.filter_camping(
+            campings = await camping_repo.filter_camping(
                 request.user.id,
                 services.camping_repo.FilterCamping(booked=True, user_id=request.user.id),
             )
 
-        return []
+        return dto._ReadManyCampings(
+            data=campings
+        )
 
     @litestar.patch("/{id:uuid}", dto=dto.UpdateCampingRequest, return_dto=dto.UpdateCampingResponse)
     @inject
