@@ -30,4 +30,4 @@ class _ReadManyReviews(BaseModel):
 
 
 class ReadManyReviewResponse(PydanticDTO[_ReadManyReviews]):
-    config = DTOConfig(rename_strategy="camel")
+    config = DTOConfig(rename_strategy="camel", max_nested_depth=3)
