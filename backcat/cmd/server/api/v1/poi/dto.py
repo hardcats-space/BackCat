@@ -30,4 +30,4 @@ class _ReadManyPOIs(BaseModel):
 
 
 class ReadManyPOIResponse(PydanticDTO[_ReadManyPOIs]):
-    config = DTOConfig(rename_strategy="camel")
+    config = DTOConfig(rename_strategy="camel", max_nested_depth=3)
