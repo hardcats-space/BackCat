@@ -71,7 +71,7 @@ class Controller(litestar.Controller):
             )
 
         return dto._ReadManyCampings(
-            data=campings
+            data=[dto._ReadManyCampingsItem(**camping.model_dump(), group=group) for camping in campings]
         )
 
     @litestar.patch("/{id:uuid}", dto=dto.UpdateCampingRequest, return_dto=dto.UpdateCampingResponse)
