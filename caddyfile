@@ -1,0 +1,16 @@
+{
+	metrics {
+		per_host
+	}
+}
+
+hardcats.space {
+	reverse_proxy /api/* 127.0.0.1:10804
+
+	root * /var/www/hardcats.space/
+	file_server
+}
+
+grafana.dev.hardcats.space {
+	reverse_proxy 127.0.0.1:10806
+}

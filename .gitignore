@@ -1,3 +1,5 @@
+grafana.ini
+
 # Project Sensitive
 config.toml
 volumes
