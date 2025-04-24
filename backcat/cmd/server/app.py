@@ -17,7 +17,7 @@ from litestar.security.jwt import OAuth2PasswordBearerAuth
 from piccolo.engine import engine_finder
 
 from backcat import configs, domain, services
-from backcat.cmd.server import api, authorization
+from backcat.cmd.server import api, authorization, mw
 from backcat.cmd.server.config import ServerConfig
 
 config = ServerConfig()  # type: ignore
@@ -120,7 +120,8 @@ app = Litestar(
             prefix="backcat",
             labels={"app": "backcat", "version": config.version},
             excluded_http_methods=["OPTIONS"],
-        ).middleware
+        ).middleware,
+        mw.service_error_middleware,
     ],
     cors_config=CORSConfig(
         allow_origins=config.cors.allow_origins,
