@@ -1,4 +1,6 @@
-from pydantic import Field
+from typing import Any
+
+from pydantic import Field, model_validator
 
 from backcat.domain.base import DomainBaseModel
 from backcat.domain.id import POIID
@@ -11,3 +13,13 @@ class POI(DomainBaseModel[POIID]):
     point: Point = Field()
     name: str = Field(max_length=150)
     description: str | None = Field(max_length=5000)
+
+    @model_validator(mode="before")
+    @classmethod
+    def build_from_flat(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "lat" in data and "lon" in data:
+                data["point"] = Point(lat=data["lat"], lon=data["lon"])
+                return data
+
+        return data

@@ -5,8 +5,7 @@ from asyncpg import DataError, UniqueViolationError
 from piccolo.columns import Column
 from pydantic import BaseModel
 
-from backcat import database
-from backcat import domain
+from backcat import database, domain
 from backcat.database.projector import ProjectionError, projection
 from backcat.services import errors
 from backcat.services.cache import Cache, Keyspace

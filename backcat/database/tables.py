@@ -73,8 +73,8 @@ class POI(Table, tablename="pois"):
     deleted_at = Timestamptz(default=None, null=True)
 
     kind = Varchar(choices=domain.POIKind, default=domain.POIKind.GENERAL, null=False)
-    lat: DoublePrecision
-    lon: DoublePrecision
+    lat = DoublePrecision()
+    lon = DoublePrecision()
     name = Varchar(length=150, null=True)
     description = Varchar(length=5000, null=True)
 
